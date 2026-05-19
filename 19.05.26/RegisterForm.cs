@@ -1,5 +1,6 @@
 using Doner.Controller;
 using Doner.Data.Entities;
+using Doner.Data.Enum;
 
 namespace _19._05._26
 {
@@ -20,6 +21,7 @@ namespace _19._05._26
             var username = usernameTextBox.Text.Trim();
             var email = emailTextBox.Text.Trim();
             var password = passwordTextBox.Text;
+            var role = (UserRole)roleComboBox.SelectedIndex;
 
             if (new[] { firstName, lastName, username, email, password }.Any(string.IsNullOrWhiteSpace))
             {
@@ -33,14 +35,43 @@ namespace _19._05._26
                 return;
             }
 
-            var ok = await _authController.Register(new Users
+            bool ok;
+            if (role == UserRole.Customer)
             {
-                FirstName = firstName,
-                LastName = lastName,
-                UserName = username,
-                Email = email,
-                Password = password
-            });
+                ok = await _authController.Register(new Customers
+                {
+                    FirstName = firstName,
+                    LastName = lastName,
+                    UserName = username,
+                    Email = email,
+                    Password = password,
+                    Role = role
+                });
+            }
+            else if(role == UserRole.Employee)
+            {
+                ok = await _authController.Register(new Employees
+                {
+                    FirstName = firstName,
+                    LastName = lastName,
+                    UserName = username,
+                    Email = email,
+                    Password = password,
+                    Role = role
+                });
+            }
+            else
+            {
+                ok = await _authController.Register(new Admins
+                {
+                    FirstName = firstName,
+                    LastName = lastName,
+                    UserName = username,
+                    Email = email,
+                    Password = password,
+                    Role = role
+                });
+            }
 
             MessageBox.Show(ok ? "Registration successful." : "Username or email already exists.", "Register");
             if (ok) Close();
