@@ -183,6 +183,11 @@ namespace Doner.Data
                     .WithMany(u => u.Orders)
                     .HasForeignKey(o => o.UserId)
                     .OnDelete(DeleteBehavior.Cascade);
+
+                x.HasOne(o => o.Address)
+                    .WithMany()
+                    .HasForeignKey(o => o.AddressId)
+                    .OnDelete(DeleteBehavior.Restrict);
             });
             modelBuilder.Entity<OrderDetails>(x =>
             {
@@ -260,7 +265,7 @@ namespace Doner.Data
                 x.HasOne(d => d.DeliveryWorker)
                     .WithMany()
                     .HasForeignKey(d => d.DeliveryWorkerId)
-                    .OnDelete(DeleteBehavior.SetNull)
+                    .OnDelete(DeleteBehavior.Restrict)
                     .IsRequired(false);
 
                 x.HasOne(d => d.Address)
