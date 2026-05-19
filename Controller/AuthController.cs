@@ -25,7 +25,6 @@ namespace Doner.Controller
                 return false;
             }
 
-            user.Role = UserRole.Customer;
             user.IsActive = true;
             await context.Users.AddAsync(user);
             await context.SaveChangesAsync();
