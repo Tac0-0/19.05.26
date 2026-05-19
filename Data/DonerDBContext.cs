@@ -13,9 +13,6 @@ namespace Doner.Data
     public class DonerDBContext : DbContext
     {
         public DbSet<Users> Users { get; set; }
-        public DbSet<Customers> Customers { get; set; }
-        public DbSet<Employees> Employees { get; set; }
-        public DbSet<Admin> Admins { get; set; }
         public DbSet<UserAddresses> UserAddresses { get; set; }
         public DbSet<Categories> Categories { get; set; }
         public DbSet<Products> Products { get; set; }
@@ -40,10 +37,6 @@ namespace Doner.Data
             modelBuilder.Entity<Users>(x =>
             {
                 x.HasKey(u => u.UserId);
-                x.HasDiscriminator<string>("UserType")
-                    .HasValue<Customers>(nameof(Customers))
-                    .HasValue<Employees>(nameof(Employees))
-                    .HasValue<Admin>(nameof(Admin));
 
                 x.Property(u => u.UserName)
                     .IsRequired()
@@ -81,21 +74,6 @@ namespace Doner.Data
                     .OnDelete(DeleteBehavior.Cascade);
             });
 
-            modelBuilder.Entity<Employees>(x =>
-            {
-                x.Property(e => e.EmployeePosition)
-                    .IsRequired()
-                    .HasConversion<string>();
-
-                x.Property(e => e.Salary)
-                    .IsRequired()
-                    .HasColumnType("decimal(10,2)");
-
-                x.Property(e => e.HireDate)
-                    .IsRequired()
-                    .HasColumnType("datetime2");
-
-            });
             modelBuilder.Entity<UserAddresses>(x =>
             {
                 x.HasKey(ua => ua.UserAddressId);

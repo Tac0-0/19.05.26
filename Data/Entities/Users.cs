@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Doner.Data.Entities
 {
-    public abstract class Users
+    public class Users
     {
         public int UserId { get; set; }
         public string UserName { get; set; }
