@@ -6,8 +6,49 @@ namespace Doner.Controller;
 
 public class ProductIngredientsController
 {
-    public async Task<List<ProductIngredients>> GetRecipeByProduct(int productId){await using DonerDBContext c=new(); return await c.ProductIngredients.Where(pi=>pi.ProductId==productId).ToListAsync();}
-    public async Task AddIngredientToProduct(int productId, int ingredientId, decimal quantity){await using DonerDBContext c=new(); await c.ProductIngredients.AddAsync(new ProductIngredients{ProductId=productId,IngredientId=ingredientId,RequiredQuantity=quantity}); await c.SaveChangesAsync();}
-    public async Task RemoveIngredientFromProduct(int id){await using DonerDBContext c=new(); var pi=await c.ProductIngredients.FindAsync(id); if(pi is null) return; c.ProductIngredients.Remove(pi); await c.SaveChangesAsync();}
-    public async Task UpdateRequiredQuantity(int id, decimal quantity){await using DonerDBContext c=new(); var pi=await c.ProductIngredients.FindAsync(id); if(pi is null) return; pi.RequiredQuantity=quantity; await c.SaveChangesAsync();}
+    public async Task<List<ProductIngredients>> GetRecipeByProduct(int productId)
+    {
+        await using DonerDBContext context = new();
+        return await context.ProductIngredients.Where(pi => pi.ProductId == productId).ToListAsync();
+    }
+
+    public async Task AddIngredientToProduct(int productId, int ingredientId, decimal quantity)
+    {
+        await using DonerDBContext context = new();
+        ProductIngredients productIngredient = new ProductIngredients
+        {
+            ProductId = productId,
+            IngredientId = ingredientId,
+            RequiredQuantity = quantity
+        };
+
+        await context.ProductIngredients.AddAsync(productIngredient);
+        await context.SaveChangesAsync();
+    }
+
+    public async Task RemoveIngredientFromProduct(int id)
+    {
+        await using DonerDBContext context = new();
+        ProductIngredients? productIngredient = await context.ProductIngredients.FindAsync(id);
+        if (productIngredient is null)
+        {
+            return;
+        }
+
+        context.ProductIngredients.Remove(productIngredient);
+        await context.SaveChangesAsync();
+    }
+
+    public async Task UpdateRequiredQuantity(int id, decimal quantity)
+    {
+        await using DonerDBContext context = new();
+        ProductIngredients? productIngredient = await context.ProductIngredients.FindAsync(id);
+        if (productIngredient is null)
+        {
+            return;
+        }
+
+        productIngredient.RequiredQuantity = quantity;
+        await context.SaveChangesAsync();
+    }
 }

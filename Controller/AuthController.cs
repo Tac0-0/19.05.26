@@ -12,7 +12,8 @@ namespace Doner.Controller
         public async Task<Users?> Login(string username, string password)
         {
             await using DonerDBContext context = new DonerDBContext();
-            _loggedUser = await context.Users.FirstOrDefaultAsync(u => u.UserName == username && u.Password == password && u.IsActive);
+            _loggedUser = await context.Users.FirstOrDefaultAsync(
+                u => u.UserName == username && u.Password == password && u.IsActive);
             return _loggedUser;
         }
 
@@ -32,12 +33,25 @@ namespace Doner.Controller
             return true;
         }
 
-        public Task<Users?> GetLoggedUser() => Task.FromResult(_loggedUser);
+        public Task<Users?> GetLoggedUser()
+        {
+            return Task.FromResult(_loggedUser);
+        }
 
         public Task Logout()
         {
             _loggedUser = null;
             return Task.CompletedTask;
+        }
+
+        public Task<bool> IsAdmin()
+        {
+            return Task.FromResult(_loggedUser?.Role == UserRole.Admin);
+        }
+
+        public Task<bool> IsCustomer()
+        {
+            return Task.FromResult(_loggedUser?.Role == UserRole.Customer);
         }
 
         public Task<bool> IsAdmin() => Task.FromResult(_loggedUser?.Role == UserRole.Admin);
