@@ -10,7 +10,7 @@ namespace _19._05._26
         private void loginButton_Click(object sender, EventArgs e)
         {
             var username = usernameTextBox.Text.Trim();
-            var role = username.Equals("admin", StringComparison.OrdinalIgnoreCase) ? "Admin" : "Customer";
+            var role = username.Equals("admin") ? "Admin" : "Customer";
             Form nextForm = role == "Customer" ? new CustomerMainForm() : new StaffMainForm(role);
             nextForm.FormClosed += (_, _) => Close();
             Hide();
