@@ -12,17 +12,18 @@ namespace Data
 {
     public class DonerDBContext : DbContext
     {
-        DbSet<Users> Users { get; set; }
-        DbSet<UserAddresses> UserAddresses { get; set; }
-        DbSet<Categories> Categories { get; set; }
-        DbSet<Products> Products { get; set; }
-        DbSet<Orders> Orders { get; set; }
-        DbSet<OrderDetails> OrderDetails { get; set; }
-        DbSet<Payments> Payments { get; set; }
-        DbSet<Deliveries> Deliveries { get; set; }
-        DbSet<Suppliers> Suppliers { get; set; }
-        DbSet<Ingredients> Ingredients { get; set; }
-        DbSet<ProductIngredients> ProductIngredients { get; set; }
+        public DbSet<Users> Users { get; set; }
+        public DbSet<Customers> Customers { get; set; }
+        public DbSet<UserAddresses> UserAddresses { get; set; }
+        public DbSet<Categories> Categories { get; set; }
+        public DbSet<Products> Products { get; set; }
+        public DbSet<Orders> Orders { get; set; }
+        public DbSet<OrderDetails> OrderDetails { get; set; }
+        public DbSet<Payments> Payments { get; set; }
+        public DbSet<Deliveries> Deliveries { get; set; }
+        public DbSet<Suppliers> Suppliers { get; set; }
+        public DbSet<Ingredients> Ingredients { get; set; }
+        public DbSet<ProductIngredients> ProductIngredients { get; set; }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             var builder = new ConfigurationBuilder();
@@ -37,6 +38,8 @@ namespace Data
             modelBuilder.Entity<Users>(x =>
             {
                 x.HasKey(u => u.UserId);
+                x.HasDiscriminator<string>("UserType")
+                    .HasValue<Customers>(nameof(Customers));
 
                 x.Property(u => u.UserName)
                     .IsRequired()
@@ -52,18 +55,6 @@ namespace Data
                     .HasMaxLength(100);
                 x.HasIndex(u => u.Email).IsUnique();
 
-                x.Property(u => u.FirstName)
-                    .IsRequired()
-                    .HasMaxLength(50);
-
-                x.Property(u => u.LastName)
-                    .IsRequired()
-                    .HasMaxLength(50);
-
-                x.Property(u => u.PhoneNumber)
-                    .IsRequired()
-                    .HasMaxLength(20);
-
                 x.Property(u => u.Role)
                     .IsRequired()
                     .HasConversion<string>();
@@ -72,6 +63,21 @@ namespace Data
                     .WithOne(ua => ua.User)
                     .HasForeignKey(ua => ua.UserId)
                     .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<Customers>(x =>
+            {
+                x.Property(c => c.FirstName)
+                    .IsRequired()
+                    .HasMaxLength(50);
+
+                x.Property(c => c.LastName)
+                    .IsRequired()
+                    .HasMaxLength(50);
+
+                x.Property(c => c.PhoneNumber)
+                    .IsRequired()
+                    .HasMaxLength(20);
             });
             modelBuilder.Entity<UserAddresses>(x =>
             {
