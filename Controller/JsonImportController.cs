@@ -12,38 +12,6 @@ public class JsonImportController
         WriteIndented = true
     };
 
-    public async Task ImportCategories(string path)
-    {
-        await using DonerDBContext context = new();
-        var items = JsonSerializer.Deserialize<List<Categories>>(await File.ReadAllTextAsync(path)) ?? [];
-        await context.Categories.AddRangeAsync(items);
-        await context.SaveChangesAsync();
-    }
-
-    public async Task ImportProducts(string path)
-    {
-        await using DonerDBContext context = new();
-        var items = JsonSerializer.Deserialize<List<Products>>(await File.ReadAllTextAsync(path)) ?? [];
-        await context.Products.AddRangeAsync(items);
-        await context.SaveChangesAsync();
-    }
-
-    public async Task ImportSuppliers(string path)
-    {
-        await using DonerDBContext context = new();
-        var items = JsonSerializer.Deserialize<List<Suppliers>>(await File.ReadAllTextAsync(path)) ?? [];
-        await context.Suppliers.AddRangeAsync(items);
-        await context.SaveChangesAsync();
-    }
-
-    public async Task ImportIngredients(string path)
-    {
-        await using DonerDBContext context = new();
-        var items = JsonSerializer.Deserialize<List<Ingredients>>(await File.ReadAllTextAsync(path)) ?? [];
-        await context.Ingredients.AddRangeAsync(items);
-        await context.SaveChangesAsync();
-    }
-
     public async Task ImportAll(string path)
     {
         var json = await File.ReadAllTextAsync(path);
@@ -97,19 +65,19 @@ public class JsonImportController
 
     public class AllDataImport
     {
-        public List<Users> Users { get; set; } = [];
-        public List<Customers> Customers { get; set; } = [];
-        public List<Employees> Employees { get; set; } = [];
-        public List<Admins> Admins { get; set; } = [];
-        public List<UserAddresses> UserAddresses { get; set; } = [];
-        public List<Categories> Categories { get; set; } = [];
-        public List<Products> Products { get; set; } = [];
-        public List<Orders> Orders { get; set; } = [];
-        public List<OrderDetails> OrderDetails { get; set; } = [];
-        public List<Payments> Payments { get; set; } = [];
-        public List<Deliveries> Deliveries { get; set; } = [];
-        public List<Suppliers> Suppliers { get; set; } = [];
-        public List<Ingredients> Ingredients { get; set; } = [];
-        public List<ProductIngredients> ProductIngredients { get; set; } = [];
+        public List<Users> Users { get; set; } = new List<Users>();
+        public List<Customers> Customers { get; set; } = new List<Customers>();
+        public List<Employees> Employees { get; set; } = new List<Employees>();
+        public List<Admins> Admins { get; set; } = new List<Admins>();
+        public List<UserAddresses> UserAddresses { get; set; } = new List<UserAddresses>();
+        public List<Categories> Categories { get; set; } = new List<Categories>();
+        public List<Products> Products { get; set; } = new List<Products>();
+        public List<Orders> Orders { get; set; } = new List<Orders>();
+        public List<OrderDetails> OrderDetails { get; set; } = new List<OrderDetails>();
+        public List<Payments> Payments { get; set; } = new List<Payments>();
+        public List<Deliveries> Deliveries { get; set; } = new List<Deliveries>();
+        public List<Suppliers> Suppliers { get; set; } = new List<Suppliers>();
+        public List<Ingredients> Ingredients { get; set; } = new List<Ingredients>();
+        public List<ProductIngredients> ProductIngredients { get; set; } = new List<ProductIngredients>();
     }
 }

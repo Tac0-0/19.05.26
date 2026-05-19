@@ -29,7 +29,7 @@ namespace Doner.Data
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             var builder = new ConfigurationBuilder();
-            builder.AddJsonFile("appsettings.json");
+            builder.AddJsonFile("C:\\Users\\11B_4\\Desktop\\proekt_12_05\\19.05.26\\Data\\appsettings.json");
             var config = builder.Build();
             string connectionString = config.GetConnectionString("DefaultConnection");
             optionsBuilder.UseSqlServer(connectionString);
