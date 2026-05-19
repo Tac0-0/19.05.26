@@ -3,55 +3,17 @@ namespace _19._05._26
     partial class StaffMainForm
     {
         private System.ComponentModel.IContainer components = null;
-        private Label roleLabel;
-        private Button usersButton;
-
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing && (components != null))
-            {
-                components.Dispose();
-            }
-            base.Dispose(disposing);
-        }
-
-        private void InitializeComponent()
-        {
-            roleLabel = new Label();
-            usersButton = new Button();
-            SuspendLayout();
-            // 
-            // roleLabel
-            // 
-            roleLabel.AutoSize = true;
-            roleLabel.Location = new Point(25, 24);
-            roleLabel.Name = "roleLabel";
-            roleLabel.Size = new Size(52, 15);
-            roleLabel.TabIndex = 0;
-            roleLabel.Text = "Role: ---";
-            // 
-            // usersButton
-            // 
-            usersButton.Location = new Point(25, 56);
-            usersButton.Name = "usersButton";
-            usersButton.Size = new Size(180, 30);
-            usersButton.TabIndex = 1;
-            usersButton.Text = "Open Users";
-            usersButton.UseVisualStyleBackColor = true;
-            usersButton.Click += usersButton_Click;
-            // 
-            // StaffMainForm
-            // 
-            AutoScaleDimensions = new SizeF(7F, 15F);
-            AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(600, 360);
-            Controls.Add(usersButton);
-            Controls.Add(roleLabel);
-            Name = "StaffMainForm";
-            StartPosition = FormStartPosition.CenterScreen;
-            Text = "Staff Dashboard";
-            ResumeLayout(false);
-            PerformLayout();
-        }
+        private Panel rootPanel; private Panel headerPanel; private Panel contentPanel; private Label titleLabel; private Label roleLabel;
+        protected override void Dispose(bool disposing){ if (disposing && (components != null)) components.Dispose(); base.Dispose(disposing);} 
+        private void InitializeComponent(){ rootPanel=new Panel();headerPanel=new Panel();contentPanel=new Panel();titleLabel=new Label();roleLabel=new Label();
+            rootPanel.SuspendLayout();headerPanel.SuspendLayout();contentPanel.SuspendLayout();SuspendLayout();
+            rootPanel.BackColor=Color.FromArgb(58,58,58); rootPanel.Dock=DockStyle.Fill; rootPanel.Padding=new Padding(16);
+            headerPanel.BackColor=Color.FromArgb(45,45,45); headerPanel.Dock=DockStyle.Top; headerPanel.Height=56;
+            titleLabel.Text="Staff Dashboard"; titleLabel.ForeColor=Color.WhiteSmoke; titleLabel.Location=new Point(16,17); titleLabel.AutoSize=true; titleLabel.Font=new Font("Segoe UI Semibold",12F,FontStyle.Bold);
+            contentPanel.BackColor=Color.FromArgb(74,74,74); contentPanel.Dock=DockStyle.Fill;
+            roleLabel.Text="Role: ---"; roleLabel.ForeColor=Color.Gainsboro; roleLabel.Location=new Point(16,20); roleLabel.AutoSize=true;
+            contentPanel.Controls.Add(roleLabel); headerPanel.Controls.Add(titleLabel); rootPanel.Controls.Add(contentPanel); rootPanel.Controls.Add(headerPanel); Controls.Add(rootPanel);
+            BackColor=Color.FromArgb(34,34,34); ClientSize=new Size(900,560); Name="StaffMainForm"; Text="Staff Dashboard"; StartPosition=FormStartPosition.CenterScreen;
+            rootPanel.ResumeLayout(false);headerPanel.ResumeLayout(false);headerPanel.PerformLayout();contentPanel.ResumeLayout(false);contentPanel.PerformLayout();ResumeLayout(false); }
     }
 }
