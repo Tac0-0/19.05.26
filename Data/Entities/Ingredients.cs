@@ -11,9 +11,9 @@ namespace Data.Entities
     {
         public int IngredientId { get; set; }
         public string Name { get; set; }
-        public int StockQuantity { get; set; }
+        public decimal QuantityInStock { get; set; }
         public IngredientUnit Unit { get; set; }
         public int SupplierId { get; set; }
-        public Suppliers Supplier { get; set;
+        public Suppliers Supplier { get; set; }
     }
 }
