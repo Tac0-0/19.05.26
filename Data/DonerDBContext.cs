@@ -13,6 +13,9 @@ namespace Doner.Data
     public class DonerDBContext : DbContext
     {
         public DbSet<Users> Users { get; set; }
+        public DbSet<Customers> Customers { get; set; }
+        public DbSet<Employees> Employees { get; set; }
+        public DbSet<Admins> Admins { get; set; }
         public DbSet<UserAddresses> UserAddresses { get; set; }
         public DbSet<Categories> Categories { get; set; }
         public DbSet<Products> Products { get; set; }
@@ -72,6 +75,21 @@ namespace Doner.Data
                     .WithOne(ua => ua.User)
                     .HasForeignKey(ua => ua.UserId)
                     .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<Employees>(x =>
+            {
+                x.Property(e => e.EmployeePosition)
+                    .IsRequired()
+                    .HasConversion<string>();
+
+                x.Property(e => e.Salary)
+                    .IsRequired()
+                    .HasColumnType("decimal(10,2)");
+
+                x.Property(e => e.HireDate)
+                    .IsRequired()
+                    .HasColumnType("datetime2");
             });
 
             modelBuilder.Entity<UserAddresses>(x =>

@@ -1,6 +1,6 @@
 ﻿namespace Doner.Data.Entities
 {
-    public class Admin : Users
+    public class Admins : Users
     {
     }
 }
