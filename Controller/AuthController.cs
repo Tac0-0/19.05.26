@@ -7,14 +7,13 @@ namespace Doner.Controller
 {
     public class AuthController
     {
-        private static Users? _loggedUser;
+        private static Users? LoggedUser;
 
         public async Task<Users?> Login(string username, string password)
         {
             await using DonerDBContext context = new DonerDBContext();
-            _loggedUser = await context.Users.FirstOrDefaultAsync(
-                u => u.UserName == username && u.Password == password && u.IsActive);
-            return _loggedUser;
+            LoggedUser = await context.Users.FirstOrDefaultAsync(u => u.UserName == username && u.Password == password && u.IsActive);
+            return LoggedUser;
         }
 
         public async Task<bool> Register(Users user)
@@ -35,27 +34,23 @@ namespace Doner.Controller
 
         public Task<Users?> GetLoggedUser()
         {
-            return Task.FromResult(_loggedUser);
+            return Task.FromResult(LoggedUser);
         }
 
         public Task Logout()
         {
-            _loggedUser = null;
+            LoggedUser = null;
             return Task.CompletedTask;
         }
 
         public Task<bool> IsAdmin()
         {
-            return Task.FromResult(_loggedUser?.Role == UserRole.Admin);
+            return Task.FromResult(LoggedUser?.Role == UserRole.Admin);
         }
 
         public Task<bool> IsCustomer()
         {
-            return Task.FromResult(_loggedUser?.Role == UserRole.Customer);
+            return Task.FromResult(LoggedUser?.Role == UserRole.Customer);
         }
-
-        public Task<bool> IsAdmin() => Task.FromResult(_loggedUser?.Role == UserRole.Admin);
-
-        public Task<bool> IsCustomer() => Task.FromResult(_loggedUser?.Role == UserRole.Customer);
     }
 }
