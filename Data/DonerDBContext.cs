@@ -1,4 +1,4 @@
-﻿using Data.Entities;
+﻿using Doner.Data.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using System;
@@ -8,12 +8,14 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 
-namespace Data
+namespace Doner.Data
 {
     public class DonerDBContext : DbContext
     {
         public DbSet<Users> Users { get; set; }
         public DbSet<Customers> Customers { get; set; }
+        public DbSet<Employees> Employees { get; set; }
+        public DbSet<Admin> Admins { get; set; }
         public DbSet<UserAddresses> UserAddresses { get; set; }
         public DbSet<Categories> Categories { get; set; }
         public DbSet<Products> Products { get; set; }
@@ -39,7 +41,9 @@ namespace Data
             {
                 x.HasKey(u => u.UserId);
                 x.HasDiscriminator<string>("UserType")
-                    .HasValue<Customers>(nameof(Customers));
+                    .HasValue<Customers>(nameof(Customers))
+                    .HasValue<Employees>(nameof(Employees))
+                    .HasValue<Admin>(nameof(Admin));
 
                 x.Property(u => u.UserName)
                     .IsRequired()
@@ -55,6 +59,18 @@ namespace Data
                     .HasMaxLength(100);
                 x.HasIndex(u => u.Email).IsUnique();
 
+                x.Property(u => u.FirstName)
+                    .IsRequired()
+                    .HasMaxLength(50);
+
+                x.Property(u => u.LastName)
+                    .IsRequired()
+                    .HasMaxLength(50);
+
+                x.Property(u => u.PhoneNumber)
+                    .IsRequired()
+                    .HasMaxLength(20);
+
                 x.Property(u => u.Role)
                     .IsRequired()
                     .HasConversion<string>();
@@ -65,19 +81,20 @@ namespace Data
                     .OnDelete(DeleteBehavior.Cascade);
             });
 
-            modelBuilder.Entity<Customers>(x =>
+            modelBuilder.Entity<Employees>(x =>
             {
-                x.Property(c => c.FirstName)
+                x.Property(e => e.EmployeePosition)
                     .IsRequired()
-                    .HasMaxLength(50);
+                    .HasConversion<string>();
 
-                x.Property(c => c.LastName)
+                x.Property(e => e.Salary)
                     .IsRequired()
-                    .HasMaxLength(50);
+                    .HasColumnType("decimal(10,2)");
 
-                x.Property(c => c.PhoneNumber)
+                x.Property(e => e.HireDate)
                     .IsRequired()
-                    .HasMaxLength(20);
+                    .HasColumnType("datetime2");
+
             });
             modelBuilder.Entity<UserAddresses>(x =>
             {

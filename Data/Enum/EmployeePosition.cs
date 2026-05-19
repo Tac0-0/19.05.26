@@ -6,10 +6,12 @@ using System.Threading.Tasks;
 
 namespace Doner.Data.Enum
 {
-    public enum PaymentMethod
+    public enum EmployeePosition
     {
-        Cash,
-        Card,
-        Online
+        Manager,
+        Cashier,
+        Cook,
+        Cleaner,
+        DeliveryWorker
     }
 }

@@ -1,4 +1,4 @@
-﻿namespace Data.Enum
+﻿namespace Doner.Data.Enum
 {
     public enum OrderStatus
     {

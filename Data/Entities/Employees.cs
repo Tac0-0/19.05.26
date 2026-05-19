@@ -7,7 +7,10 @@ using System.Threading.Tasks;
 
 namespace Doner.Data.Entities
 {
-    public class Customers : Users
+    public class Employees : Users
     {
+        public EmployeePosition EmployeePosition { get; set; }
+        public decimal Salary { get; set; }
+        public DateTime HireDate { get; set; }
     }
 }

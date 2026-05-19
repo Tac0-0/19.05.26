@@ -4,15 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Data.Enum
+namespace Doner.Data.Enum
 {
     public enum UserRole
     {
         Customer,
         Admin,
-        Manager,
-        Cashier,
-        Cook,
-        DeliveryWorker
+        Employee
     }
 }

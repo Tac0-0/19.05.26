@@ -1,11 +1,11 @@
-﻿using Data.Enum;
+﻿using Doner.Data.Enum;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Data.Entities
+namespace Doner.Data.Entities
 {
     public abstract class Users
     {
@@ -13,6 +13,9 @@ namespace Data.Entities
         public string UserName { get; set; }
         public string Password { get; set; }
         public string Email { get; set; }
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+        public string PhoneNumber { get; set; }
         public UserRole Role { get; set; }
         public ICollection<UserAddresses> UserAddresses { get; set; }
         public ICollection<Orders> Orders { get; set; }

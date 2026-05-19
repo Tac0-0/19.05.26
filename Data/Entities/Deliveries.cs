@@ -1,11 +1,11 @@
-﻿using Data.Enum;
+﻿using Doner.Data.Enum;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Data.Entities
+namespace Doner.Data.Entities
 {
     public class Deliveries
     {
