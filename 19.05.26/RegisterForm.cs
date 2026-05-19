@@ -5,12 +5,14 @@ namespace _19._05._26
         public RegisterForm()
         {
             InitializeComponent();
+            roleComboBox.SelectedIndex = 0;
         }
 
         private void createAccountButton_Click(object sender, EventArgs e)
         {
-            // TODO: save user with Role = Customer
-            MessageBox.Show("Registration stub created (Role = Customer).", "Register");
+            var selectedRole = roleComboBox.SelectedItem?.ToString() ?? "Customer";
+            // TODO: save user with the selected role
+            MessageBox.Show($"Registration stub created (Role = {selectedRole}).", "Register");
             Close();
         }
     }
