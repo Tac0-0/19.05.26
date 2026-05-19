@@ -5,7 +5,7 @@ using System.Text.Json;
 
 namespace Doner.Controller;
 
-public class JsonImportController
+public class JsonController
 {
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
