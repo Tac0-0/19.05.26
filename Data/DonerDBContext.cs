@@ -220,6 +220,97 @@ namespace Data
                     .HasForeignKey(p => p.OrderId)
                     .OnDelete(DeleteBehavior.Cascade);
             });
+
+            modelBuilder.Entity<Deliveries>(x =>
+            {
+                x.HasKey(d => d.DeliveryId);
+
+                x.Property(d => d.DeliveryStatus)
+                    .IsRequired()
+                    .HasConversion<string>();
+
+                x.Property(d => d.DeliveryFee)
+                    .IsRequired()
+                    .HasColumnType("decimal(10,2)");
+
+                x.Property(d => d.EstimatedDeliveryTime)
+                    .HasColumnType("datetime2");
+
+                x.Property(d => d.DeliveredAt)
+                    .HasColumnType("datetime2");
+
+                x.HasOne(d => d.Order)
+                    .WithMany()
+                    .HasForeignKey(d => d.OrderId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                x.HasOne(d => d.DeliveryWorker)
+                    .WithMany()
+                    .HasForeignKey(d => d.DeliveryWorkerId)
+                    .OnDelete(DeleteBehavior.SetNull)
+                    .IsRequired(false);
+
+                x.HasOne(d => d.Address)
+                    .WithMany()
+                    .HasForeignKey(d => d.AddressId)
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            modelBuilder.Entity<Suppliers>(x =>
+            {
+                x.HasKey(s => s.SupplierId);
+
+                x.Property(s => s.Name)
+                    .IsRequired()
+                    .HasMaxLength(100);
+
+                x.Property(s => s.PhoneNumber)
+                    .HasMaxLength(20);
+
+                x.Property(s => s.Address)
+                    .HasMaxLength(200);
+            });
+
+            modelBuilder.Entity<Ingredients>(x =>
+            {
+                x.HasKey(i => i.IngredientId);
+
+                x.Property(i => i.Name)
+                    .IsRequired()
+                    .HasMaxLength(100);
+
+                x.Property(i => i.QuantityInStock)
+                    .IsRequired()
+                    .HasColumnType("decimal(10,3)");
+
+                x.Property(i => i.Unit)
+                    .IsRequired()
+                    .HasConversion<string>();
+
+                x.HasOne(i => i.Supplier)
+                    .WithMany()
+                    .HasForeignKey(i => i.SupplierId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<ProductIngredients>(x =>
+            {
+                x.HasKey(pi => pi.ProductIngredientId);
+
+                x.Property(pi => pi.RequiredQuantity)
+                    .IsRequired()
+                    .HasColumnType("decimal(10,3)");
+
+                x.HasOne(pi => pi.Product)
+                    .WithMany()
+                    .HasForeignKey(pi => pi.ProductId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                x.HasOne(pi => pi.Ingredient)
+                    .WithMany()
+                    .HasForeignKey(pi => pi.IngredientId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
             
         }
     }
