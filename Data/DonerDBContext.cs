@@ -1,17 +1,17 @@
 ﻿using Doner.Data.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.Json;
-using System.Threading.Tasks;
 
 namespace Doner.Data
 {
     public class DonerDBContext : DbContext
     {
+        public DonerDBContext()
+        {
+        }
+        public DonerDBContext(DbContextOptions<DonerDBContext> options) : base(options)
+        {
+        }
         public DbSet<Users> Users { get; set; }
         public DbSet<Customers> Customers { get; set; }
         public DbSet<Employees> Employees { get; set; }
@@ -28,11 +28,14 @@ namespace Doner.Data
         public DbSet<ProductIngredients> ProductIngredients { get; set; }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            var builder = new ConfigurationBuilder();
-            builder.AddJsonFile("C:\\Users\\11B_4\\Desktop\\proekt_12_05\\19.05.26\\Data\\appsettings.json");
-            var config = builder.Build();
-            string connectionString = config.GetConnectionString("DefaultConnection");
-            optionsBuilder.UseSqlServer(connectionString);
+            if (!optionsBuilder.IsConfigured)
+            {
+                var builder = new ConfigurationBuilder();
+                builder.AddJsonFile("C:\\Users\\11B_4\\Desktop\\proekt_12_05\\19.05.26\\Data\\appsettings.json");
+                var config = builder.Build();
+                string connectionString = config.GetConnectionString("DefaultConnection");
+                optionsBuilder.UseSqlServer(connectionString);
+            }
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -217,7 +220,7 @@ namespace Doner.Data
             modelBuilder.Entity<Payments>(x =>
             {
                 x.HasKey(p => p.PaymentId);
-                
+
                 x.Property(p => p.PaymentMethod)
                     .IsRequired()
                     .HasConversion<string>();
@@ -232,7 +235,7 @@ namespace Doner.Data
 
                 x.Property(p => p.PaymentDate)
                     .IsRequired();
-                
+
                 x.HasOne(p => p.Order)
                     .WithMany(o => o.Payments)
                     .HasForeignKey(p => p.OrderId)
@@ -329,7 +332,7 @@ namespace Doner.Data
                     .HasForeignKey(pi => pi.IngredientId)
                     .OnDelete(DeleteBehavior.Cascade);
             });
-            
+
         }
     }
 }

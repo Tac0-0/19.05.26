@@ -7,18 +7,27 @@ namespace Doner.Controller
 {
     public class AuthController
     {
+        public AuthController()
+        {
+            context = new DonerDBContext();
+        }
+        public AuthController(DonerDBContext dbContext)
+        {
+            context = dbContext;
+        }
+
+
         private static Users? LoggedUser;
+        private DonerDBContext context;
 
         public async Task<Users?> Login(string username, string password)
         {
-            await using DonerDBContext context = new DonerDBContext();
             LoggedUser = await context.Users.FirstOrDefaultAsync(u => u.UserName == username && u.Password == password && u.IsActive);
             return LoggedUser;
         }
 
         public async Task<bool> Register(Users user)
         {
-            await using DonerDBContext context = new DonerDBContext();
             bool exists = await context.Users.AnyAsync(u => u.UserName == user.UserName || u.Email == user.Email);
             if (exists)
             {
