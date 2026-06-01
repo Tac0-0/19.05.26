@@ -4,17 +4,20 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Doner.Controller;
 
-public class ProductIngredientsController
+public class ProductIngredientsController : DbController
 {
+    public ProductIngredientsController(Func<DonerDBContext>? createContext = null) : base(createContext)
+    {
+    }
     public async Task<List<ProductIngredients>> GetRecipeByProduct(int productId)
     {
-        await using DonerDBContext context = new();
+        await using DonerDBContext context = CreateContext();
         return await context.ProductIngredients.Where(pi => pi.ProductId == productId).ToListAsync();
     }
 
     public async Task AddIngredientToProduct(int productId, int ingredientId, decimal quantity)
     {
-        await using DonerDBContext context = new();
+        await using DonerDBContext context = CreateContext();
         ProductIngredients productIngredient = new ProductIngredients
         {
             ProductId = productId,
@@ -28,7 +31,7 @@ public class ProductIngredientsController
 
     public async Task RemoveIngredientFromProduct(int id)
     {
-        await using DonerDBContext context = new();
+        await using DonerDBContext context = CreateContext();
         ProductIngredients? productIngredient = await context.ProductIngredients.FindAsync(id);
         if (productIngredient is null)
         {
@@ -41,7 +44,7 @@ public class ProductIngredientsController
 
     public async Task UpdateRequiredQuantity(int id, decimal quantity)
     {
-        await using DonerDBContext context = new();
+        await using DonerDBContext context = CreateContext();
         ProductIngredients? productIngredient = await context.ProductIngredients.FindAsync(id);
         if (productIngredient is null)
         {

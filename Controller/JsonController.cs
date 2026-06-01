@@ -7,8 +7,11 @@ using Doner.Data.Enum;
 
 namespace Doner.Controller;
 
-public class JsonController
+public class JsonController : DbController
 {
+    public JsonController(Func<DonerDBContext>? createContext = null) : base(createContext)
+    {
+    }
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
         WriteIndented = true,
@@ -24,7 +27,7 @@ public class JsonController
             : [.. data.Customers, .. data.Employees, .. data.Admins];
         RemoveNavigationReferences(data, users);
 
-        await using DonerDBContext context = new();
+        await using DonerDBContext context = CreateContext();
         await using var transaction = await context.Database.BeginTransactionAsync();
         try
         {
@@ -125,7 +128,7 @@ public class JsonController
 
     public async Task ExportAll(string path)
     {
-        await using DonerDBContext context = new();
+        await using DonerDBContext context = CreateContext();
 
         var data = new AllDataImport
         {
