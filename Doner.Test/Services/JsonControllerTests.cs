@@ -61,14 +61,71 @@ public class JsonControllerTests
         var factory = new ControllerTestFactory();
         string path = Path.Combine(Path.GetTempPath(), $"{Guid.NewGuid()}.json");
 
-        Assert.That(async () => await new JsonController(factory.CreateContext).ImportAll(path), Throws.TypeOf<FileNotFoundException>());
+        Assert.That((Func<Task>)(async () => await new JsonController(factory.CreateContext).ImportAll(path)), Throws.TypeOf<FileNotFoundException>());
     }
 
     [TestCase("{\"Role\":[]}")]
     [TestCase("{\"Role\":\"not-a-role\"}")]
     public void UsersJsonConverterRejectsInvalidRoles(string json)
     {
-        Assert.That(() => JsonSerializer.Deserialize<Users>(json, OptionsWithUsersConverter()), Throws.TypeOf<JsonException>());
+        Assert.That((Action)(() => JsonSerializer.Deserialize<Users>(json, OptionsWithUsersConverter())), Throws.TypeOf<JsonException>());
+    }
+
+    [Test]
+    public void ImportAllRejectsMalformedJson()
+    {
+        var factory = new ControllerTestFactory();
+        string path = Path.GetTempFileName();
+        try
+        {
+            File.WriteAllText(path, "{");
+            Assert.That((Func<Task>)(async () => await new JsonController(factory.CreateContext).ImportAll(path)), Throws.TypeOf<JsonException>());
+        }
+        finally
+        {
+            File.Delete(path);
+        }
+    }
+
+    [Test]
+    public void ImportAllPropagatesProviderTransactionExceptions()
+    {
+        var factory = new ControllerTestFactory();
+        string path = Path.GetTempFileName();
+        try
+        {
+            File.WriteAllText(path, "{}");
+            Assert.That((Func<Task>)(async () => await new JsonController(factory.CreateContext).ImportAll(path)), Throws.TypeOf<InvalidOperationException>());
+        }
+        finally
+        {
+            File.Delete(path);
+        }
+    }
+
+    [Test]
+    public void ImportAndExportPropagateFileAndContextExceptions()
+    {
+        var factory = new ControllerTestFactory();
+        var controller = new JsonController(factory.CreateContext);
+        string missingDirectory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString(), "export.json");
+        Assert.That((Func<Task>)(async () => await controller.ImportAll(null!)), Throws.TypeOf<ArgumentNullException>());
+        Assert.That((Func<Task>)(async () => await controller.ExportAll(missingDirectory)), Throws.TypeOf<DirectoryNotFoundException>());
+
+        string path = Path.GetTempFileName();
+        try
+        {
+            File.WriteAllText(path, "{}");
+            var failingController = new JsonController(ControllerExceptionAssertions.ThrowContextCreation);
+            Assert.That((Func<Task>)(async () => await failingController.ImportAll(path)), Throws.TypeOf<InvalidOperationException>()
+                .With.Message.EqualTo("context creation failed"));
+            Assert.That((Func<Task>)(async () => await failingController.ExportAll(path)), Throws.TypeOf<InvalidOperationException>()
+                .With.Message.EqualTo("context creation failed"));
+        }
+        finally
+        {
+            File.Delete(path);
+        }
     }
 
     private static JsonSerializerOptions OptionsWithUsersConverter()

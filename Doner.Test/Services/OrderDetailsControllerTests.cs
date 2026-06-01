@@ -27,4 +27,16 @@ public class OrderDetailsControllerTests
         await controller.RemoveProductFromOrder(-1);
         Assert.That(await controller.GetDetailsByOrder(seed.OrderId), Has.Count.EqualTo(1));
     }
+    [Test]
+    public void ContextCreationFailuresArePropagated()
+    {
+        var controller = new OrderDetailsController(ControllerExceptionAssertions.ThrowContextCreation);
+        ControllerExceptionAssertions.AssertContextCreationFailure(
+            async () => await controller.GetDetailsByOrder(1),
+            async () => await controller.AddProductToOrder(1, 1, 1),
+            async () => await controller.RemoveProductFromOrder(1),
+            async () => await controller.UpdateQuantity(1, 1),
+            async () => await controller.RecalculateSubtotal(1));
+    }
+
 }

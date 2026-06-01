@@ -28,4 +28,22 @@ public class UserAddressesControllerTests
         Assert.That(await controller.GetAddressesByUser(seed.CustomerId), Has.Count.EqualTo(1));
         Assert.That(await controller.GetDefaultAddress(seed.CustomerId), Is.Null);
     }
+    [Test]
+    public void NullEntitiesAndContextCreationFailuresArePropagated()
+    {
+        var factory = new ControllerTestFactory();
+        var controller = new UserAddressesController(factory.CreateContext);
+        Assert.That((Func<Task>)(async () => await controller.AddAddress(null!)), Throws.TypeOf<ArgumentNullException>());
+        Assert.That((Func<Task>)(async () => await controller.UpdateAddress(null!)), Throws.TypeOf<NullReferenceException>());
+
+        var failingController = new UserAddressesController(ControllerExceptionAssertions.ThrowContextCreation);
+        ControllerExceptionAssertions.AssertContextCreationFailure(
+            async () => await failingController.GetAddressesByUser(1),
+            async () => await failingController.GetDefaultAddress(1),
+            async () => await failingController.AddAddress(new UserAddresses()),
+            async () => await failingController.UpdateAddress(new UserAddresses()),
+            async () => await failingController.DeleteAddress(1),
+            async () => await failingController.SetDefaultAddress(1));
+    }
+
 }

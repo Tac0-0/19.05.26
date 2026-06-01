@@ -24,4 +24,15 @@ public class ProductIngredientsControllerTests
         await controller.RemoveIngredientFromProduct(-1);
         Assert.That(await controller.GetRecipeByProduct(seed.ProductId), Has.Count.EqualTo(1));
     }
+    [Test]
+    public void ContextCreationFailuresArePropagated()
+    {
+        var controller = new ProductIngredientsController(ControllerExceptionAssertions.ThrowContextCreation);
+        ControllerExceptionAssertions.AssertContextCreationFailure(
+            async () => await controller.GetRecipeByProduct(1),
+            async () => await controller.AddIngredientToProduct(1, 1, 1),
+            async () => await controller.RemoveIngredientFromProduct(1),
+            async () => await controller.UpdateRequiredQuantity(1, 1));
+    }
+
 }

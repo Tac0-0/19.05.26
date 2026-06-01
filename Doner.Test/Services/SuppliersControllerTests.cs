@@ -25,4 +25,21 @@ public class SuppliersControllerTests
         await controller.DeleteSupplier(-1);
         Assert.That(await controller.GetSupplierById(added.SupplierId), Is.Null);
     }
+    [Test]
+    public void NullEntitiesAndContextCreationFailuresArePropagated()
+    {
+        var factory = new ControllerTestFactory();
+        var controller = new SuppliersController(factory.CreateContext);
+        Assert.That((Func<Task>)(async () => await controller.AddSupplier(null!)), Throws.TypeOf<ArgumentNullException>());
+        Assert.That((Func<Task>)(async () => await controller.UpdateSupplier(null!)), Throws.TypeOf<NullReferenceException>());
+
+        var failingController = new SuppliersController(ControllerExceptionAssertions.ThrowContextCreation);
+        ControllerExceptionAssertions.AssertContextCreationFailure(
+            async () => await failingController.GetAllSuppliers(),
+            async () => await failingController.GetSupplierById(1),
+            async () => await failingController.AddSupplier(new Suppliers()),
+            async () => await failingController.UpdateSupplier(new Suppliers()),
+            async () => await failingController.DeleteSupplier(1));
+    }
+
 }

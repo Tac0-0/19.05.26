@@ -52,9 +52,47 @@ public class UsersControllerTests
         Assert.That((await controller.GetUserById(customer.UserId))!.Role, Is.EqualTo(UserRole.Customer));
     }
 
+    [Test]
+    public async Task GetUserByIdNormalizesLegacyRole()
+    {
+        var factory = new ControllerTestFactory();
+        var employee = new Employees
+        {
+            UserName = "legacy-employee", Password = "password", Email = "legacy-employee@example.com",
+            FirstName = "Legacy", LastName = "Employee", PhoneNumber = "1", IsActive = true, Role = (UserRole)99
+        };
+        await using (var context = factory.CreateContext())
+        {
+            context.Users.Add(employee);
+            await context.SaveChangesAsync();
+        }
+
+        Assert.That((await new UsersController(factory.CreateContext).GetUserById(employee.UserId))!.Role, Is.EqualTo(UserRole.Employee));
+    }
+
     private static Customers NewCustomer(string username, string email) => new()
     {
         UserName = username, Password = "password", Email = email, FirstName = "Test", LastName = "User",
         PhoneNumber = "1", Role = UserRole.Customer, IsActive = true
     };
+    [Test]
+    public void NullEntitiesAndContextCreationFailuresArePropagated()
+    {
+        var factory = new ControllerTestFactory();
+        var controller = new UsersController(factory.CreateContext);
+        Assert.That((Func<Task>)(async () => await controller.AddUser(null!)), Throws.TypeOf<ArgumentNullException>());
+        Assert.That((Func<Task>)(async () => await controller.UpdateUser(null!)), Throws.TypeOf<NullReferenceException>());
+
+        var failingController = new UsersController(ControllerExceptionAssertions.ThrowContextCreation);
+        ControllerExceptionAssertions.AssertContextCreationFailure(
+            async () => await failingController.GetAllUsers(),
+            async () => await failingController.GetUsersByRole(UserRole.Customer),
+            async () => await failingController.GetUserById(1),
+            async () => await failingController.AddUser(new Customers()),
+            async () => await failingController.UpdateUser(new Customers()),
+            async () => await failingController.DeleteUser(1),
+            async () => await failingController.ChangeRole(1, UserRole.Admin),
+            async () => await failingController.SetActive(1, true));
+    }
+
 }

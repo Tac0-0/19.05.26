@@ -24,4 +24,20 @@ public class PaymentsControllerTests
         await controller.RefundPayment(-1);
         Assert.That(await controller.GetPaymentsByStatus(PaymentStatus.Refunded), Has.Count.EqualTo(1));
     }
+    [Test]
+    public void NullEntitiesAndContextCreationFailuresArePropagated()
+    {
+        var factory = new ControllerTestFactory();
+        var controller = new PaymentsController(factory.CreateContext);
+        Assert.That((Func<Task>)(async () => await controller.CreatePayment(null!)), Throws.TypeOf<ArgumentNullException>());
+
+        var failingController = new PaymentsController(ControllerExceptionAssertions.ThrowContextCreation);
+        ControllerExceptionAssertions.AssertContextCreationFailure(
+            async () => await failingController.GetPaymentsByOrder(1),
+            async () => await failingController.CreatePayment(new Payments()),
+            async () => await failingController.MarkAsPaid(1),
+            async () => await failingController.RefundPayment(1),
+            async () => await failingController.GetPaymentsByStatus(PaymentStatus.Paid));
+    }
+
 }

@@ -30,4 +30,24 @@ public class OrdersControllerTests
         Assert.That((await controller.GetOrderById(created.OrderId))!.OrderStatus, Is.EqualTo(OrderStatus.Cancelled));
         Assert.That(await controller.GetOrderById(-1), Is.Null);
     }
+    [Test]
+    public void InvalidArgumentsAndContextCreationFailuresArePropagated()
+    {
+        var factory = new ControllerTestFactory();
+        var controller = new OrdersController(factory.CreateContext);
+        Assert.That((Action)(() => controller.CalculateTotal(null!)), Throws.TypeOf<ArgumentNullException>());
+        Assert.That((Func<Task>)(async () => await controller.CreateOrder(null!, [])), Throws.TypeOf<NullReferenceException>());
+        Assert.That((Func<Task>)(async () => await controller.CreateOrder(new Orders(), null!)), Throws.TypeOf<ArgumentNullException>());
+
+        var failingController = new OrdersController(ControllerExceptionAssertions.ThrowContextCreation);
+        ControllerExceptionAssertions.AssertContextCreationFailure(
+            async () => await failingController.GetAllOrders(),
+            async () => await failingController.GetOrdersByUser(1),
+            async () => await failingController.GetOrdersByStatus(OrderStatus.Pending),
+            async () => await failingController.GetOrderById(1),
+            async () => await failingController.CreateOrder(new Orders(), []),
+            async () => await failingController.UpdateOrderStatus(1, OrderStatus.Pending),
+            async () => await failingController.CancelOrder(1));
+    }
+
 }

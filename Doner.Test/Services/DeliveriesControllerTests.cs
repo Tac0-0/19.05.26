@@ -26,4 +26,18 @@ public class DeliveriesControllerTests
         await controller.UpdateDeliveryStatus(-1, DeliveryStatus.Failed);
         Assert.That(await controller.GetDeliveriesByStatus(DeliveryStatus.Cancelled), Has.Count.EqualTo(1));
     }
+    [Test]
+    public void ContextCreationFailuresArePropagated()
+    {
+        var controller = new DeliveriesController(ControllerExceptionAssertions.ThrowContextCreation);
+        ControllerExceptionAssertions.AssertContextCreationFailure(
+            async () => await controller.GetAllDeliveries(),
+            async () => await controller.GetDeliveriesByWorker(1),
+            async () => await controller.GetDeliveriesByStatus(DeliveryStatus.Assigned),
+            async () => await controller.AssignDeliveryWorker(1, 1),
+            async () => await controller.UpdateDeliveryStatus(1, DeliveryStatus.Delivered),
+            async () => await controller.CompleteDelivery(1),
+            async () => await controller.CancelDelivery(1));
+    }
+
 }

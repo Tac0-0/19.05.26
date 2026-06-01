@@ -25,4 +25,17 @@ public class ReportsControllerTests
         Assert.That(await controller.GetCustomerOrderHistory(seed.CustomerId), Has.Count.EqualTo(1));
         Assert.That(await controller.GetCustomerOrderHistory(-1), Is.Empty);
     }
+    [Test]
+    public void ContextCreationFailuresArePropagated()
+    {
+        var controller = new ReportsController(ControllerExceptionAssertions.ThrowContextCreation);
+        ControllerExceptionAssertions.AssertContextCreationFailure(
+            async () => await controller.GetDailyIncome(DateTime.Today),
+            async () => await controller.GetMonthlyIncome(2026, 1),
+            async () => await controller.GetBestSellingProducts(),
+            async () => await controller.GetOrdersCountByStatus(),
+            async () => await controller.GetLowStockReport(),
+            async () => await controller.GetCustomerOrderHistory(1));
+    }
+
 }

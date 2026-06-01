@@ -25,4 +25,21 @@ public class CategoriesControllerTests
         await controller.DeleteCategory(-1);
         Assert.That(await controller.GetCategoryById(added.CategoryId), Is.Null);
     }
+    [Test]
+    public void NullEntitiesAndContextCreationFailuresArePropagated()
+    {
+        var factory = new ControllerTestFactory();
+        var controller = new CategoriesController(factory.CreateContext);
+        Assert.That((Func<Task>)(async () => await controller.AddCategory(null!)), Throws.TypeOf<ArgumentNullException>());
+        Assert.That((Func<Task>)(async () => await controller.UpdateCategory(null!)), Throws.TypeOf<NullReferenceException>());
+
+        var failingController = new CategoriesController(ControllerExceptionAssertions.ThrowContextCreation);
+        ControllerExceptionAssertions.AssertContextCreationFailure(
+            async () => await failingController.GetAllCategories(),
+            async () => await failingController.GetCategoryById(1),
+            async () => await failingController.AddCategory(new Categories()),
+            async () => await failingController.UpdateCategory(new Categories()),
+            async () => await failingController.DeleteCategory(1));
+    }
+
 }

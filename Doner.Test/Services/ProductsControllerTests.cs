@@ -29,4 +29,24 @@ public class ProductsControllerTests
         await controller.DeleteProduct(-1);
         Assert.That(await controller.GetProductById(added.ProductId), Is.Null);
     }
+    [Test]
+    public void NullEntitiesAndContextCreationFailuresArePropagated()
+    {
+        var factory = new ControllerTestFactory();
+        var controller = new ProductsController(factory.CreateContext);
+        Assert.That((Func<Task>)(async () => await controller.AddProduct(null!)), Throws.TypeOf<ArgumentNullException>());
+        Assert.That((Func<Task>)(async () => await controller.UpdateProduct(null!)), Throws.TypeOf<NullReferenceException>());
+
+        var failingController = new ProductsController(ControllerExceptionAssertions.ThrowContextCreation);
+        ControllerExceptionAssertions.AssertContextCreationFailure(
+            async () => await failingController.GetAllProducts(),
+            async () => await failingController.GetAvailableProducts(),
+            async () => await failingController.GetProductsByCategory(1),
+            async () => await failingController.GetProductById(1),
+            async () => await failingController.AddProduct(new Products()),
+            async () => await failingController.UpdateProduct(new Products()),
+            async () => await failingController.DeleteProduct(1),
+            async () => await failingController.SetAvailability(1, true));
+    }
+
 }

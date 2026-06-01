@@ -30,4 +30,23 @@ public class IngredientsControllerTests
         await controller.DeleteIngredient(-1);
         Assert.That(await controller.GetAllIngredients(), Has.Count.EqualTo(1));
     }
+    [Test]
+    public void NullEntitiesAndContextCreationFailuresArePropagated()
+    {
+        var factory = new ControllerTestFactory();
+        var controller = new IngredientsController(factory.CreateContext);
+        Assert.That((Func<Task>)(async () => await controller.AddIngredient(null!)), Throws.TypeOf<ArgumentNullException>());
+        Assert.That((Func<Task>)(async () => await controller.UpdateIngredient(null!)), Throws.TypeOf<NullReferenceException>());
+
+        var failingController = new IngredientsController(ControllerExceptionAssertions.ThrowContextCreation);
+        ControllerExceptionAssertions.AssertContextCreationFailure(
+            async () => await failingController.GetAllIngredients(),
+            async () => await failingController.GetLowStockIngredients(),
+            async () => await failingController.AddIngredient(new Ingredients()),
+            async () => await failingController.UpdateIngredient(new Ingredients()),
+            async () => await failingController.DeleteIngredient(1),
+            async () => await failingController.IncreaseStock(1, 1),
+            async () => await failingController.DecreaseStock(1, 1));
+    }
+
 }

@@ -8,6 +8,12 @@ namespace Doner.Test.Services;
 public class AuthControllerTests
 {
     [Test]
+    public void DefaultConstructorCreatesController()
+    {
+        Assert.That((Action)(() => _ = new AuthController()), Throws.Nothing);
+    }
+
+    [Test]
     public async Task RegisterLoginAndLogoutManageCustomerSession()
     {
         var factory = new ControllerTestFactory();
@@ -48,6 +54,19 @@ public class AuthControllerTests
         Assert.That(await controller.Login("inactive", "password"), Is.Null);
         Assert.That((await controller.Login("legacy-admin", "password"))!.Role, Is.EqualTo(UserRole.Admin));
         Assert.That(await controller.IsAdmin(), Is.True);
+    }
+
+    [Test]
+    public async Task DatabaseExceptionsArePropagated()
+    {
+        var context = new ControllerTestFactory().CreateContext();
+        await context.DisposeAsync();
+        var controller = new AuthController(context);
+
+        Assert.That((Func<Task>)(async () => await new AuthController(new ControllerTestFactory().CreateContext()).Register(null!)), Throws.TypeOf<InvalidOperationException>()
+            .With.InnerException.TypeOf<NullReferenceException>());
+        Assert.That((Func<Task>)(async () => await controller.Login("user", "password")), Throws.TypeOf<ObjectDisposedException>());
+        Assert.That((Func<Task>)(async () => await controller.Register(NewCustomer("user", "user@example.com"))), Throws.TypeOf<ObjectDisposedException>());
     }
 
     private static Customers NewCustomer(string username, string email, bool active = false) => new()
