@@ -22,9 +22,8 @@ namespace _19._05._26
             var email = emailTextBox.Text.Trim();
             var password = passwordTextBox.Text;
             var phoneNumber = phoneTextBox.Text.Trim();
-            var role = (UserRole)roleComboBox.SelectedIndex;
 
-            if (new[] { firstName, lastName, username, email, password }.Any(string.IsNullOrWhiteSpace))
+            if (new[] { firstName, lastName, username, email, password, phoneNumber }.Any(string.IsNullOrWhiteSpace))
             {
                 MessageBox.Show("All fields are required.", "Validation", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
@@ -36,49 +35,41 @@ namespace _19._05._26
                 return;
             }
 
-            bool ok;
-            if (role == UserRole.Customer)
-            {
-                ok = await _authController.Register(new Customers
-                {
-                    FirstName = firstName,
-                    LastName = lastName,
-                    UserName = username,
-                    Email = email,
-                    Password = password,
-                    PhoneNumber = phoneNumber,
-                    Role = role
-                });
-            }
-            else if(role == UserRole.Employee)
-            {
-                ok = await _authController.Register(new Employees
-                {
-                    FirstName = firstName,
-                    LastName = lastName,
-                    UserName = username,
-                    Email = email,
-                    Password = password,
-                    PhoneNumber = phoneNumber,
-                    Role = role
-                });
-            }
-            else
-            {
-                ok = await _authController.Register(new Admins
-                {
-                    FirstName = firstName,
-                    LastName = lastName,
-                    UserName = username,
-                    Email = email,
-                    Password = password,
-                    PhoneNumber = phoneNumber,
-                    Role = role
-                });
-            }
+            Users user = CreateUser(roleComboBox.SelectedIndex);
+            user.FirstName = firstName;
+            user.LastName = lastName;
+            user.UserName = username;
+            user.Email = email;
+            user.Password = password;
+            user.PhoneNumber = phoneNumber;
 
+            bool ok = await _authController.Register(user);
             MessageBox.Show(ok ? "Registration successful." : "Username or email already exists.", "Register");
             if (ok) Close();
+        }
+
+        private static Users CreateUser(int selectedRole)
+        {
+            return selectedRole switch
+            {
+                0 => new Customers { Role = UserRole.Customer },
+                1 => CreateEmployee(EmployeePosition.Cashier),
+                2 => CreateEmployee(EmployeePosition.Cook),
+                3 => CreateEmployee(EmployeePosition.DeliveryWorker),
+                4 => CreateEmployee(EmployeePosition.Manager),
+                5 => new Admins { Role = UserRole.Admin },
+                _ => throw new InvalidOperationException("Select a valid role.")
+            };
+        }
+
+        private static Employees CreateEmployee(EmployeePosition position)
+        {
+            return new Employees
+            {
+                Role = UserRole.Employee,
+                EmployeePosition = position,
+                HireDate = DateTime.Now
+            };
         }
     }
 }
