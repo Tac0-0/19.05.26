@@ -32,6 +32,19 @@ public static class UiGridHelper
             RowHeadersVisible = false
         };
 
+        grid.CellFormatting += (_, args) =>
+        {
+            if (args.Value is Enum value)
+            {
+                args.Value = FormatEnum(value);
+                args.FormattingApplied = true;
+            }
+        };
+        grid.DataError += (_, args) =>
+        {
+            args.ThrowException = false;
+        };
+
         hostPanel.Controls.Add(grid);
         hostPanel.Controls.Add(toolbar);
         return (grid, toolbar);
@@ -189,7 +202,8 @@ public static class UiGridHelper
         if (actual.IsEnum)
         {
             ComboBox combo = new() { Dock = DockStyle.Fill, DropDownStyle = ComboBoxStyle.DropDownList, DataSource = Enum.GetValues(actual) };
-            combo.SelectedItem = value ?? Enum.GetValues(actual).GetValue(0);
+            object? selectedValue = value is not null && Enum.IsDefined(actual, value) ? value : Enum.GetValues(actual).GetValue(0);
+            combo.SelectedItem = selectedValue;
             return combo;
         }
         if (actual == typeof(bool)) return new CheckBox { Dock = DockStyle.Fill, Checked = value as bool? ?? false };
@@ -217,6 +231,8 @@ public static class UiGridHelper
         try { return Convert.ChangeType(text, actual); }
         catch { throw new InvalidOperationException($"Enter a valid value for {SplitName(property.Name)}."); }
     }
+
+    private static string FormatEnum(Enum value) => Enum.IsDefined(value.GetType(), value) ? value.ToString() : $"Unknown ({Convert.ToInt64(value)})";
 
     private static string SplitName(string name) => string.Concat(name.Select((character, index) => index > 0 && char.IsUpper(character) ? $" {character}" : character.ToString()));
 }
