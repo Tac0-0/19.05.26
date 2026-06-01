@@ -17,28 +17,110 @@ public class JsonController
 
     public async Task ImportAll(string path)
     {
-        var json = await File.ReadAllTextAsync(path);
-        var data = JsonSerializer.Deserialize<AllDataImport>(json, JsonOptions) ?? new AllDataImport();
-
-        await using DonerDBContext context = new();
-
+        string json = await File.ReadAllTextAsync(path);
+        AllDataImport data = JsonSerializer.Deserialize<AllDataImport>(json, JsonOptions) ?? new AllDataImport();
         List<Users> users = data.Users.Count > 0
             ? data.Users
             : [.. data.Customers, .. data.Employees, .. data.Admins];
+        RemoveNavigationReferences(data, users);
 
-        await context.Users.AddRangeAsync(users);
-        await context.UserAddresses.AddRangeAsync(data.UserAddresses);
-        await context.Categories.AddRangeAsync(data.Categories);
-        await context.Products.AddRangeAsync(data.Products);
-        await context.Orders.AddRangeAsync(data.Orders);
-        await context.OrderDetails.AddRangeAsync(data.OrderDetails);
-        await context.Payments.AddRangeAsync(data.Payments);
-        await context.Deliveries.AddRangeAsync(data.Deliveries);
-        await context.Suppliers.AddRangeAsync(data.Suppliers);
-        await context.Ingredients.AddRangeAsync(data.Ingredients);
-        await context.ProductIngredients.AddRangeAsync(data.ProductIngredients);
+        await using DonerDBContext context = new();
+        await using var transaction = await context.Database.BeginTransactionAsync();
+        try
+        {
+            await ClearDatabaseAsync(context);
+            await AddWithIdentityInsertAsync(context, "Suppliers", data.Suppliers);
+            await AddWithIdentityInsertAsync(context, "Users", users);
+            await AddWithIdentityInsertAsync(context, "UserAddresses", data.UserAddresses);
+            await AddWithIdentityInsertAsync(context, "Categories", data.Categories);
+            await AddWithIdentityInsertAsync(context, "Products", data.Products);
+            await AddWithIdentityInsertAsync(context, "Orders", data.Orders);
+            await AddWithIdentityInsertAsync(context, "OrderDetails", data.OrderDetails);
+            await AddWithIdentityInsertAsync(context, "Payments", data.Payments);
+            await AddWithIdentityInsertAsync(context, "Deliveries", data.Deliveries);
+            await AddWithIdentityInsertAsync(context, "Ingredients", data.Ingredients);
+            await AddWithIdentityInsertAsync(context, "ProductIngredients", data.ProductIngredients);
+            await transaction.CommitAsync();
+        }
+        catch
+        {
+            await transaction.RollbackAsync();
+            throw;
+        }
+    }
 
-        await context.SaveChangesAsync();
+    private static async Task ClearDatabaseAsync(DonerDBContext context)
+    {
+        const string deleteSql = """
+            DELETE FROM [ProductIngredients];
+            DELETE FROM [Deliveries];
+            DELETE FROM [Payments];
+            DELETE FROM [OrderDetails];
+            DELETE FROM [Ingredients];
+            DELETE FROM [Orders];
+            DELETE FROM [Products];
+            DELETE FROM [UserAddresses];
+            DELETE FROM [Categories];
+            DELETE FROM [Suppliers];
+            DELETE FROM [Users];
+            """;
+        await context.Database.ExecuteSqlRawAsync(deleteSql);
+    }
+
+    private static async Task AddWithIdentityInsertAsync<TEntity>(DonerDBContext context, string tableName, IEnumerable<TEntity> entities)
+        where TEntity : class
+    {
+        List<TEntity> rows = entities.ToList();
+        if (rows.Count == 0) return;
+
+        await context.Set<TEntity>().AddRangeAsync(rows);
+        await context.Database.ExecuteSqlRawAsync($"SET IDENTITY_INSERT [{tableName}] ON;");
+        try
+        {
+            await context.SaveChangesAsync();
+        }
+        finally
+        {
+            await context.Database.ExecuteSqlRawAsync($"SET IDENTITY_INSERT [{tableName}] OFF;");
+            context.ChangeTracker.Clear();
+        }
+    }
+
+    private static void RemoveNavigationReferences(AllDataImport data, IEnumerable<Users> users)
+    {
+        foreach (Users user in users)
+        {
+            user.UserAddresses = null!;
+            user.Orders = null!;
+        }
+        foreach (UserAddresses address in data.UserAddresses) address.User = null!;
+        foreach (Categories category in data.Categories) category.Products = null!;
+        foreach (Products product in data.Products) product.Category = null!;
+        foreach (Orders order in data.Orders)
+        {
+            order.User = null!;
+            order.Address = null!;
+            order.OrderDetails = null!;
+            order.Payments = null!;
+        }
+        foreach (OrderDetails detail in data.OrderDetails)
+        {
+            detail.Order = null!;
+            detail.Product = null!;
+        }
+        foreach (Payments payment in data.Payments) payment.Order = null!;
+        foreach (Deliveries delivery in data.Deliveries)
+        {
+            delivery.Order = null!;
+            delivery.DeliveryWorker = null;
+            delivery.Address = null!;
+        }
+        foreach (Ingredients ingredient in data.Ingredients) ingredient.Supplier = null!;
+        foreach (ProductIngredients ingredient in data.ProductIngredients)
+        {
+            ingredient.Product = null!;
+            ingredient.Ingredient = null!;
+        }
     }
 
     public async Task ExportAll(string path)

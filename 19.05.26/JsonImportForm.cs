@@ -31,7 +31,7 @@ namespace _19._05._26
                 return;
             }
 
-            if (MessageBox.Show("Import the selected JSON file into the database?", "Confirm JSON import", MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes) return;
+            if (MessageBox.Show("Replace the current database with the selected JSON backup?", "Confirm JSON import", MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes) return;
             await RunTransferAsync("Importing JSON data...", "JSON data imported successfully.", () => _controller.ImportAll(path));
         }
 
@@ -63,7 +63,7 @@ namespace _19._05._26
             catch (Exception ex)
             {
                 statusLabel.Text = "The JSON data transfer failed.";
-                MessageBox.Show(ex.Message, "JSON data transfer failed", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(ex.GetBaseException().Message, "JSON data transfer failed", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             finally
             {
