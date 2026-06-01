@@ -2,10 +2,6 @@ using System.Drawing.Drawing2D;
 
 namespace _19._05._26;
 
-/// <summary>
-/// Applies the shared polished visual language to every form, including forms
-/// created at runtime by the grid editor.
-/// </summary>
 public static class UiTheme
 {
     private static readonly Color Ink = Color.FromArgb(22, 31, 46);
