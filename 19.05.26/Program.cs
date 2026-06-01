@@ -11,7 +11,10 @@ namespace _19._05._26
             // To customize application configuration such as set high DPI settings or default font,
             // see https://aka.ms/applicationconfiguration.
             ApplicationConfiguration.Initialize();
-            Application.Run(new LoginForm());
+            UiTheme.Enable();
+            LoginForm loginForm = new();
+            UiTheme.Apply(loginForm);
+            Application.Run(loginForm);
         }
     }
 }

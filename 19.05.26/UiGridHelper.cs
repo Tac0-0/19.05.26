@@ -146,6 +146,7 @@ public static class UiGridHelper
         dialog.Controls.Add(layout);
         dialog.AcceptButton = save;
         dialog.CancelButton = cancel;
+        UiTheme.Apply(dialog);
 
         while (dialog.ShowDialog() == DialogResult.OK)
         {
