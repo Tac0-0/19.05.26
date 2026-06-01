@@ -10,19 +10,29 @@ public class UsersController
     public async Task<List<Users>> GetAllUsers()
     {
         await using DonerDBContext context = new();
-        return await context.Users.ToListAsync();
+        List<Users> users = await context.Users.ToListAsync();
+        if (UserRoleNormalizer.NormalizeLegacyRoles(users))
+        {
+            await context.SaveChangesAsync();
+        }
+        return users;
     }
 
     public async Task<List<Users>> GetUsersByRole(UserRole role)
     {
-        await using DonerDBContext context = new();
-        return await context.Users.Where(u => u.Role == role).ToListAsync();
+        List<Users> users = await GetAllUsers();
+        return users.Where(u => u.Role == role).ToList();
     }
 
     public async Task<Users?> GetUserById(int id)
     {
         await using DonerDBContext context = new();
-        return await context.Users.FindAsync(id);
+        Users? user = await context.Users.FindAsync(id);
+        if (user is not null && UserRoleNormalizer.NormalizeLegacyRole(user))
+        {
+            await context.SaveChangesAsync();
+        }
+        return user;
     }
 
     public async Task AddUser(Users user)

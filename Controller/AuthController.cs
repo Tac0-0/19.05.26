@@ -23,6 +23,10 @@ namespace Doner.Controller
         public async Task<Users?> Login(string username, string password)
         {
             LoggedUser = await context.Users.FirstOrDefaultAsync(u => u.UserName == username && u.Password == password && u.IsActive);
+            if (LoggedUser is not null && UserRoleNormalizer.NormalizeLegacyRole(LoggedUser))
+            {
+                await context.SaveChangesAsync();
+            }
             return LoggedUser;
         }
 
