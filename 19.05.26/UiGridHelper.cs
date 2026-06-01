@@ -111,7 +111,7 @@ public static class UiGridHelper
     {
         HashSet<string> excluded = new(excludedProperties, StringComparer.OrdinalIgnoreCase);
         List<PropertyInfo> properties = entity.GetType().GetProperties()
-            .Where(property => property.CanRead && property.CanWrite && !excluded.Contains(property.Name) && IsEditable(property.PropertyType))
+            .Where(property => property.CanRead && property.CanWrite && !excluded.Contains(property.Name) && !IsGeneratedIdentifier(entity, property) && IsEditable(property.PropertyType))
             .ToList();
 
         using Form dialog = new()
@@ -196,6 +196,28 @@ public static class UiGridHelper
     }
 
     private static bool IsEditable(Type type) => IsDisplayable(type);
+
+    private static bool IsGeneratedIdentifier(object entity, PropertyInfo property)
+    {
+        Type concreteType = entity.GetType();
+        if (concreteType.Namespace != "Doner.Data.Entities") return false;
+        Type? entityType = concreteType;
+        while (entityType is not null && entityType != typeof(object))
+        {
+            if (property.Name.Equals($"{entityType.Name}Id", StringComparison.OrdinalIgnoreCase) ||
+                property.Name.Equals($"{Singularize(entityType.Name)}Id", StringComparison.OrdinalIgnoreCase)) return true;
+            entityType = entityType.BaseType;
+        }
+        return false;
+    }
+
+    private static string Singularize(string name)
+    {
+        if (name.EndsWith("ies", StringComparison.OrdinalIgnoreCase)) return $"{name[..^3]}y";
+        if (name.EndsWith("ses", StringComparison.OrdinalIgnoreCase)) return name[..^2];
+        if (name.EndsWith('s')) return name[..^1];
+        return name;
+    }
 
     private static Control CreateEditor(PropertyInfo property, object? value)
     {
