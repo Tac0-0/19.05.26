@@ -8,12 +8,13 @@ namespace Doner.Test.Helpers;
 
 internal sealed class ControllerTestFactory
 {
+    private static readonly InMemoryDatabaseRoot DatabaseRoot = new();
     private readonly DbContextOptions<DonerDBContext> options;
 
     public ControllerTestFactory()
     {
         options = new DbContextOptionsBuilder<DonerDBContext>()
-            .UseInMemoryDatabase(Guid.NewGuid().ToString(), new InMemoryDatabaseRoot())
+            .UseInMemoryDatabase(Guid.NewGuid().ToString(), DatabaseRoot)
             .Options;
 
         using DonerDBContext context = CreateContext();
