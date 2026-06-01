@@ -12,7 +12,12 @@ namespace _19._05._26
         {
             InitializeComponent();
             var (grid, toolbar) = UiGridHelper.BuildGridUi(contentPanel);
-            async Task reload() => await UiGridHelper.BindAsync(grid, _controller.GetAllUsers);
+            grid.CellFormatting += UsersGrid_CellFormatting;
+            async Task reload()
+            {
+                await UiGridHelper.BindAsync(grid, _controller.GetAllUsers);
+                grid.Columns[nameof(Users.Role)].HeaderText = "Role / Position";
+            }
             UiGridHelper.AddButton(toolbar, "Reload", reload);
             UiGridHelper.AddButton(toolbar, "Add", async () =>
             {
@@ -58,6 +63,23 @@ namespace _19._05._26
                 return Task.CompletedTask;
             });
             Load += async (_, _) => await reload();
+        }
+
+        private static void UsersGrid_CellFormatting(object? sender, DataGridViewCellFormattingEventArgs args)
+        {
+            if (sender is not DataGridView grid ||
+                args.RowIndex < 0 ||
+                args.ColumnIndex < 0 ||
+                grid.Columns[args.ColumnIndex].DataPropertyName != nameof(Users.Role) ||
+                grid.Rows[args.RowIndex].DataBoundItem is not Employees employee)
+            {
+                return;
+            }
+
+            args.Value = Enum.IsDefined(typeof(EmployeePosition), employee.EmployeePosition)
+                ? employee.EmployeePosition.ToString()
+                : $"Unknown position ({Convert.ToInt64(employee.EmployeePosition)})";
+            args.FormattingApplied = true;
         }
 
         private sealed class NewUserRole { public UserRole Role { get; set; } }
