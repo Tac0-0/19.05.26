@@ -31,7 +31,7 @@ namespace Doner.Data
             if (!optionsBuilder.IsConfigured)
             {
                 var builder = new ConfigurationBuilder();
-                builder.AddJsonFile("C:\\Users\\11B_4\\Desktop\\proekt_12_05\\19.05.26\\Data\\appsettings.json");
+                builder.AddJsonFile("C:\\Users\\11B_14\\source\\repos\\Tac0-0\\19.05.26\\Data\\appsettings.json");
                 var config = builder.Build();
                 string connectionString = config.GetConnectionString("DefaultConnection");
                 optionsBuilder.UseSqlServer(connectionString);

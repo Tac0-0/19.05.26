@@ -21,6 +21,7 @@ namespace _19._05._26
             var username = usernameTextBox.Text.Trim();
             var email = emailTextBox.Text.Trim();
             var password = passwordTextBox.Text;
+            var phoneNumber = phoneTextBox.Text.Trim();
             var role = (UserRole)roleComboBox.SelectedIndex;
 
             if (new[] { firstName, lastName, username, email, password }.Any(string.IsNullOrWhiteSpace))
@@ -45,6 +46,7 @@ namespace _19._05._26
                     UserName = username,
                     Email = email,
                     Password = password,
+                    PhoneNumber = phoneNumber,
                     Role = role
                 });
             }
@@ -57,6 +59,7 @@ namespace _19._05._26
                     UserName = username,
                     Email = email,
                     Password = password,
+                    PhoneNumber = phoneNumber,
                     Role = role
                 });
             }
@@ -69,6 +72,7 @@ namespace _19._05._26
                     UserName = username,
                     Email = email,
                     Password = password,
+                    PhoneNumber = phoneNumber,
                     Role = role
                 });
             }
