@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Doner.Data.Migrations
 {
     [DbContext(typeof(DonerDBContext))]
-    [Migration("20260519113027_DonerDBMigration")]
+    [Migration("20260601061823_DonerDBMigration")]
     partial class DonerDBMigration
     {
         /// <inheritdoc />
