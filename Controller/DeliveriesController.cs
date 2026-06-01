@@ -5,29 +5,32 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Doner.Controller;
 
-public class DeliveriesController
+public class DeliveriesController : DbController
 {
+    public DeliveriesController(Func<DonerDBContext>? createContext = null) : base(createContext)
+    {
+    }
     public async Task<List<Deliveries>> GetAllDeliveries()
     {
-        await using DonerDBContext context = new();
+        await using DonerDBContext context = CreateContext();
         return await context.Deliveries.ToListAsync();
     }
 
     public async Task<List<Deliveries>> GetDeliveriesByWorker(int userId)
     {
-        await using DonerDBContext context = new();
+        await using DonerDBContext context = CreateContext();
         return await context.Deliveries.Where(d => d.DeliveryWorkerId == userId).ToListAsync();
     }
 
     public async Task<List<Deliveries>> GetDeliveriesByStatus(DeliveryStatus status)
     {
-        await using DonerDBContext context = new();
+        await using DonerDBContext context = CreateContext();
         return await context.Deliveries.Where(d => d.DeliveryStatus == status).ToListAsync();
     }
 
     public async Task AssignDeliveryWorker(int deliveryId, int userId)
     {
-        await using DonerDBContext context = new();
+        await using DonerDBContext context = CreateContext();
         Deliveries? delivery = await context.Deliveries.FindAsync(deliveryId);
         if (delivery is null)
         {
@@ -41,7 +44,7 @@ public class DeliveriesController
 
     public async Task UpdateDeliveryStatus(int deliveryId, DeliveryStatus status)
     {
-        await using DonerDBContext context = new();
+        await using DonerDBContext context = CreateContext();
         Deliveries? delivery = await context.Deliveries.FindAsync(deliveryId);
         if (delivery is null)
         {

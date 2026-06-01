@@ -4,17 +4,20 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Doner.Controller;
 
-public class OrderDetailsController
+public class OrderDetailsController : DbController
 {
+    public OrderDetailsController(Func<DonerDBContext>? createContext = null) : base(createContext)
+    {
+    }
     public async Task<List<OrderDetails>> GetDetailsByOrder(int orderId)
     {
-        await using DonerDBContext context = new();
+        await using DonerDBContext context = CreateContext();
         return await context.OrderDetails.Where(x => x.OrderId == orderId).ToListAsync();
     }
 
     public async Task AddProductToOrder(int orderId, int productId, int quantity)
     {
-        await using DonerDBContext context = new();
+        await using DonerDBContext context = CreateContext();
         Products? product = await context.Products.FindAsync(productId);
         if (product is null)
         {
@@ -36,7 +39,7 @@ public class OrderDetailsController
 
     public async Task RemoveProductFromOrder(int orderDetailId)
     {
-        await using DonerDBContext context = new();
+        await using DonerDBContext context = CreateContext();
         OrderDetails? detail = await context.OrderDetails.FindAsync(orderDetailId);
         if (detail is null)
         {
@@ -49,7 +52,7 @@ public class OrderDetailsController
 
     public async Task UpdateQuantity(int orderDetailId, int quantity)
     {
-        await using DonerDBContext context = new();
+        await using DonerDBContext context = CreateContext();
         OrderDetails? detail = await context.OrderDetails.FindAsync(orderDetailId);
         if (detail is null)
         {
@@ -63,7 +66,7 @@ public class OrderDetailsController
 
     public async Task RecalculateSubtotal(int orderDetailId)
     {
-        await using DonerDBContext context = new();
+        await using DonerDBContext context = CreateContext();
         OrderDetails? detail = await context.OrderDetails.FindAsync(orderDetailId);
         if (detail is null)
         {

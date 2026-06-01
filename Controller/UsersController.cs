@@ -5,11 +5,14 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Doner.Controller;
 
-public class UsersController
+public class UsersController : DbController
 {
+    public UsersController(Func<DonerDBContext>? createContext = null) : base(createContext)
+    {
+    }
     public async Task<List<Users>> GetAllUsers()
     {
-        await using DonerDBContext context = new();
+        await using DonerDBContext context = CreateContext();
         List<Users> users = await context.Users.ToListAsync();
         if (UserRoleNormalizer.NormalizeLegacyRoles(users))
         {
@@ -26,7 +29,7 @@ public class UsersController
 
     public async Task<Users?> GetUserById(int id)
     {
-        await using DonerDBContext context = new();
+        await using DonerDBContext context = CreateContext();
         Users? user = await context.Users.FindAsync(id);
         if (user is not null && UserRoleNormalizer.NormalizeLegacyRole(user))
         {
@@ -37,21 +40,21 @@ public class UsersController
 
     public async Task AddUser(Users user)
     {
-        await using DonerDBContext context = new();
+        await using DonerDBContext context = CreateContext();
         await context.Users.AddAsync(user);
         await context.SaveChangesAsync();
     }
 
     public async Task UpdateUser(Users user)
     {
-        await using DonerDBContext context = new();
+        await using DonerDBContext context = CreateContext();
         context.Users.Update(user);
         await context.SaveChangesAsync();
     }
 
     public async Task DeleteUser(int id)
     {
-        await using DonerDBContext context = new();
+        await using DonerDBContext context = CreateContext();
         Users? user = await context.Users.FindAsync(id);
         if (user is null) return;
         context.Users.Remove(user);
@@ -60,7 +63,7 @@ public class UsersController
 
     public async Task ChangeRole(int userId, UserRole role)
     {
-        await using DonerDBContext context = new();
+        await using DonerDBContext context = CreateContext();
         Users? user = await context.Users.FindAsync(userId);
         if (user is null) return;
         user.Role = role;
@@ -69,7 +72,7 @@ public class UsersController
 
     public async Task SetActive(int userId, bool isActive)
     {
-        await using DonerDBContext context = new();
+        await using DonerDBContext context = CreateContext();
         Users? user = await context.Users.FindAsync(userId);
         if (user is null) return;
         user.IsActive = isActive;
