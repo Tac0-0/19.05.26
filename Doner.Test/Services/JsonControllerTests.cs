@@ -54,6 +54,23 @@ public class JsonControllerTests
         Assert.That(user, Is.TypeOf(expectedType));
     }
 
+
+    [Test]
+    public void ImportAllRejectsMissingFiles()
+    {
+        var factory = new ControllerTestFactory();
+        string path = Path.Combine(Path.GetTempPath(), $"{Guid.NewGuid()}.json");
+
+        Assert.That(async () => await new JsonController(factory.CreateContext).ImportAll(path), Throws.TypeOf<FileNotFoundException>());
+    }
+
+    [TestCase("{\"Role\":[]}")]
+    [TestCase("{\"Role\":\"not-a-role\"}")]
+    public void UsersJsonConverterRejectsInvalidRoles(string json)
+    {
+        Assert.That(() => JsonSerializer.Deserialize<Users>(json, OptionsWithUsersConverter()), Throws.TypeOf<JsonException>());
+    }
+
     private static JsonSerializerOptions OptionsWithUsersConverter()
     {
         Type converterType = typeof(JsonController).GetNestedType("UsersJsonConverter", BindingFlags.NonPublic)!;

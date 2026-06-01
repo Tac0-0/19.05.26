@@ -25,6 +25,8 @@ public class AuthControllerTests
         Assert.That(await controller.IsAdmin(), Is.False);
         await controller.Logout();
         Assert.That(await controller.GetLoggedUser(), Is.Null);
+        Assert.That(await controller.IsCustomer(), Is.False);
+        Assert.That(await controller.IsAdmin(), Is.False);
     }
 
     [Test]
