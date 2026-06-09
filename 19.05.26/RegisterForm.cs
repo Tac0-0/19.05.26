@@ -11,61 +11,75 @@ namespace _19._05._26
         public RegisterForm()
         {
             InitializeComponent();
-            roleComboBox.Items.Clear();
-            roleComboBox.Items.AddRange(new object[] { "Customer", "Cashier", "Cook", "DeliveryWorker", "Manager", "Admin" });
             roleComboBox.SelectedIndex = 0;
-            roleComboBox.Enabled = true;
-            roleComboBox.Visible = true;
-            roleLabel.AutoSize = true;
-            roleLabel.Text = "Role";
-            roleLabel.Location = new Point(16, 226);
-            createAccountButton.Location = new Point(16, 301);
         }
 
         private async void createAccountButton_Click(object sender, EventArgs e)
         {
-            var firstName = firstNameTextBox.Text.Trim();
-            var lastName = lastNameTextBox.Text.Trim();
-            var username = usernameTextBox.Text.Trim();
-            var email = emailTextBox.Text.Trim();
-            var password = passwordTextBox.Text;
-            var phoneNumber = phoneTextBox.Text.Trim();
-
-            if (new[] { firstName, lastName, username, email, password, phoneNumber }.Any(string.IsNullOrWhiteSpace))
+            SetBusy(true);
+            try
             {
-                MessageBox.Show("All fields are required.", "Validation", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
+                var firstName = firstNameTextBox.Text.Trim();
+                var lastName = lastNameTextBox.Text.Trim();
+                var username = usernameTextBox.Text.Trim();
+                var email = emailTextBox.Text.Trim();
+                var password = passwordTextBox.Text;
+                var phoneNumber = phoneTextBox.Text.Trim();
 
-            if (!email.Contains('@'))
+                if (new[] { firstName, lastName, username, email, password, phoneNumber }.Any(string.IsNullOrWhiteSpace))
+                {
+                    MessageBox.Show("All fields are required.", "Validation", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
+                if (!email.Contains('@'))
+                {
+                    MessageBox.Show("Please enter a valid email.", "Validation", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
+                Users user = CreateUser(roleComboBox.SelectedItem?.ToString());
+                user.FirstName = firstName;
+                user.LastName = lastName;
+                user.UserName = username;
+                user.Email = email;
+                user.Password = password;
+                user.PhoneNumber = phoneNumber;
+
+                bool ok = await _authController.Register(user);
+                MessageBox.Show(ok ? "Registration successful." : "Username or email already exists.", "Register");
+                if (ok) Close();
+            }
+            catch (Exception ex)
             {
-                MessageBox.Show("Please enter a valid email.", "Validation", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
+                MessageBox.Show(ex.GetBaseException().Message, "Registration failed", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
-
-            Users user = CreateUser(roleComboBox.SelectedIndex);
-            user.FirstName = firstName;
-            user.LastName = lastName;
-            user.UserName = username;
-            user.Email = email;
-            user.Password = password;
-            user.PhoneNumber = phoneNumber;
-
-            bool ok = await _authController.Register(user);
-            MessageBox.Show(ok ? "Registration successful." : "Username or email already exists.", "Register");
-            if (ok) Close();
+            finally
+            {
+                if (Visible)
+                {
+                    SetBusy(false);
+                }
+            }
         }
 
-        private static Users CreateUser(int selectedRole)
+        private void SetBusy(bool busy)
+        {
+            createAccountButton.Enabled = !busy;
+            roleComboBox.Enabled = !busy;
+            UseWaitCursor = busy;
+        }
+
+        private static Users CreateUser(string? selectedRole)
         {
             return selectedRole switch
             {
-                0 => new Customers { Role = UserRole.Customer },
-                1 => CreateEmployee(EmployeePosition.Cashier),
-                2 => CreateEmployee(EmployeePosition.Cook),
-                3 => CreateEmployee(EmployeePosition.DeliveryWorker),
-                4 => CreateEmployee(EmployeePosition.Manager),
-                5 => new Admins { Role = UserRole.Admin },
+                "Customer" => new Customers { Role = UserRole.Customer },
+                "Cashier" => CreateEmployee(EmployeePosition.Cashier),
+                "Cook" => CreateEmployee(EmployeePosition.Cook),
+                "DeliveryWorker" => CreateEmployee(EmployeePosition.DeliveryWorker),
+                "Manager" => CreateEmployee(EmployeePosition.Manager),
+                "Admin" => new Admins { Role = UserRole.Admin },
                 _ => throw new InvalidOperationException("Select a valid role.")
             };
         }

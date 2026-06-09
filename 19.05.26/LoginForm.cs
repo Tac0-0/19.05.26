@@ -10,30 +10,44 @@ namespace _19._05._26
         public LoginForm()
         {
             InitializeComponent();
-            importJsonButton.Text = "Import JSON (Demo)";
         }
 
         private async void loginButton_Click(object sender, EventArgs e)
         {
-            var username = usernameTextBox.Text.Trim();
-            var password = passwordTextBox.Text;
-            if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password))
+            SetBusy(true);
+            try
             {
-                MessageBox.Show("Username and password are required.", "Validation", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
+                var username = usernameTextBox.Text.Trim();
+                var password = passwordTextBox.Text;
+                if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password))
+                {
+                    MessageBox.Show("Username and password are required.", "Validation", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
 
-            var user = await _authController.Login(username, password);
-            if (user is null)
+                var user = await _authController.Login(username, password);
+                if (user is null)
+                {
+                    MessageBox.Show("Invalid credentials or inactive account.", "Login", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+
+                Form nextForm = user.Role == UserRole.Customer ? new CustomerMainForm() : new StaffMainForm(user);
+                nextForm.FormClosed += (_, _) => Close();
+                Hide();
+                nextForm.Show();
+            }
+            catch (Exception ex)
             {
-                MessageBox.Show("Invalid credentials or inactive account.", "Login", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
+                MessageBox.Show(ex.GetBaseException().Message, "Login failed", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
-
-            Form nextForm = user.Role == UserRole.Customer ? new CustomerMainForm() : new StaffMainForm(user);
-            nextForm.FormClosed += (_, _) => Close();
-            Hide();
-            nextForm.Show();
+            finally
+            {
+                if (Visible)
+                {
+                    SetBusy(false);
+                }
+            }
         }
 
         private void registerButton_Click(object sender, EventArgs e)
@@ -43,7 +57,22 @@ namespace _19._05._26
 
         private void importJsonButton_Click(object sender, EventArgs e)
         {
-            new JsonImportForm(allowDemoAccess: true).ShowDialog(this);
+            try
+            {
+                new JsonImportForm(allowDemoAccess: true).ShowDialog(this);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.GetBaseException().Message, "JSON import failed", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void SetBusy(bool busy)
+        {
+            loginButton.Enabled = !busy;
+            registerButton.Enabled = !busy;
+            importJsonButton.Enabled = !busy;
+            UseWaitCursor = busy;
         }
     }
 }
