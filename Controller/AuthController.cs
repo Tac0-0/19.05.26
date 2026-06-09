@@ -42,7 +42,15 @@ namespace Doner.Controller
         public async Task<bool> Register(Users user)
         {
             ArgumentNullException.ThrowIfNull(user);
-            if (user.Role != UserRole.Customer || user is not Customers)
+            bool allowedPublicRole = user switch
+            {
+                Customers => user.Role == UserRole.Customer,
+                Employees => user.Role == UserRole.Employee,
+                Admins => user.Role == UserRole.Admin,
+                _ => false
+            };
+
+            if (!allowedPublicRole)
             {
                 return false;
             }

@@ -19,13 +19,19 @@ public class AuthControllerTests
         var factory = new ControllerTestFactory();
         var controller = new AuthController(factory.CreateContext());
         var customer = NewCustomer("new-user", "new@example.com");
+        var employee = NewEmployee("cashier", "cashier@example.com");
+        var admin = NewAdmin("admin", "admin@example.com");
 
         Assert.That(await controller.Register(customer), Is.True);
+        Assert.That(await controller.Register(employee), Is.True);
+        Assert.That(await controller.Register(admin), Is.True);
         Assert.That(customer.IsActive, Is.True);
+        Assert.That(employee.IsActive, Is.True);
+        Assert.That(admin.IsActive, Is.True);
         Assert.That(await controller.Register(NewCustomer("new-user", "different@example.com")), Is.False);
         Assert.That(await controller.Register(NewCustomer("different", "new@example.com")), Is.False);
-        Assert.That(await controller.Register(NewEmployee("cashier", "cashier@example.com")), Is.False);
-        Assert.That(await controller.Register(NewAdmin("admin", "admin@example.com")), Is.False);
+        Assert.That(await controller.Register(NewEmployee("cashier", "different-employee@example.com")), Is.False);
+        Assert.That(await controller.Register(NewAdmin("admin", "different-admin@example.com")), Is.False);
         Assert.That(await controller.Login("new-user", "wrong"), Is.Null);
         Assert.That(await controller.Login("new-user", "password"), Is.SameAs(customer));
         Assert.That(await controller.GetLoggedUser(), Is.SameAs(customer));
