@@ -10,8 +10,7 @@ namespace _19._05._26
         public LoginForm()
         {
             InitializeComponent();
-            importJsonButton.Enabled = false;
-            importJsonButton.Visible = false;
+            importJsonButton.Text = "Import JSON (Demo)";
         }
 
         private async void loginButton_Click(object sender, EventArgs e)
@@ -42,6 +41,9 @@ namespace _19._05._26
             new RegisterForm().ShowDialog(this);
         }
 
-        private void importJsonButton_Click(object sender, EventArgs e) { }
+        private void importJsonButton_Click(object sender, EventArgs e)
+        {
+            new JsonImportForm(allowDemoAccess: true).ShowDialog(this);
+        }
     }
 }
