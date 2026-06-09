@@ -25,17 +25,11 @@ namespace _19._05._26
             UiGridHelper.AddButton(toolbar, "Reload", reload);
             UiGridHelper.AddButton(toolbar, "Add", async () =>
             {
-                NewUserRole input = new();
-                if (!UiGridHelper.EditEntity(input, "Choose user role")) return;
-                Users user = input.Role switch
-                {
-                    UserRole.Admin => new Admins(),
-                    UserRole.Employee => new Employees { HireDate = DateTime.Now },
-                    _ => new Customers()
-                };
-                user.Role = input.Role;
+                NewUserType input = new();
+                if (!UiGridHelper.EditEntity(input, "Choose user type")) return;
+                Users user = CreateUser(input.UserType);
                 user.IsActive = true;
-                if (!UiGridHelper.EditEntity(user, "Add user", "UserId", "Role")) return;
+                if (!UiGridHelper.EditEntity(user, "Add user", "UserId", "Role", "EmployeePosition")) return;
                 await _controller.AddUser(user);
                 await reload();
             });
@@ -86,6 +80,44 @@ namespace _19._05._26
             args.FormattingApplied = true;
         }
 
-        private sealed class NewUserRole { public UserRole Role { get; set; } }
+        private static Users CreateUser(NewUserTypeSelection userType)
+        {
+            return userType switch
+            {
+                NewUserTypeSelection.Admin => new Admins { Role = UserRole.Admin },
+                NewUserTypeSelection.Cashier => CreateEmployee(EmployeePosition.Cashier),
+                NewUserTypeSelection.Cook => CreateEmployee(EmployeePosition.Cook),
+                NewUserTypeSelection.Cleaner => CreateEmployee(EmployeePosition.Cleaner),
+                NewUserTypeSelection.DeliveryWorker => CreateEmployee(EmployeePosition.DeliveryWorker),
+                NewUserTypeSelection.Manager => CreateEmployee(EmployeePosition.Manager),
+                _ => new Customers { Role = UserRole.Customer }
+            };
+        }
+
+        private static Employees CreateEmployee(EmployeePosition position)
+        {
+            return new Employees
+            {
+                Role = UserRole.Employee,
+                EmployeePosition = position,
+                HireDate = DateTime.Now
+            };
+        }
+
+        private sealed class NewUserType
+        {
+            public NewUserTypeSelection UserType { get; set; }
+        }
+
+        private enum NewUserTypeSelection
+        {
+            Customer,
+            Cashier,
+            Cook,
+            Cleaner,
+            DeliveryWorker,
+            Manager,
+            Admin
+        }
     }
 }
