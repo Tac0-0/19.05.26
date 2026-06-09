@@ -102,7 +102,7 @@ namespace _19._05._26
             importJsonButton.Name = "importJsonButton";
             importJsonButton.Size = new Size(320, 34);
             importJsonButton.TabIndex = 4;
-            importJsonButton.Text = "Import JSON";
+            importJsonButton.Text = "Import JSON (Demo)";
             importJsonButton.UseVisualStyleBackColor = false;
             importJsonButton.Click += importJsonButton_Click;
             // 
@@ -132,6 +132,8 @@ namespace _19._05._26
             BackColor = Color.FromArgb(34, 34, 34);
             ClientSize = new Size(380, 320);
             Controls.Add(rootPanel);
+            FormBorderStyle = FormBorderStyle.FixedDialog;
+            MaximizeBox = false;
             Name = "LoginForm";
             StartPosition = FormStartPosition.CenterScreen;
             Text = "Login";
