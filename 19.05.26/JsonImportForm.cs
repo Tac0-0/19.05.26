@@ -6,11 +6,21 @@ namespace _19._05._26
     {
         private readonly JsonController _controller = new();
 
-        public JsonImportForm(StaffAccess? access = null)
+        public JsonImportForm(StaffAccess? access = null, bool allowDemoAccess = false)
         {
             InitializeComponent();
             StaffAccess? resolvedAccess = access ?? StaffAccess.FromCurrentSession();
-            if (StaffAccess.DenyUnless(this, resolvedAccess, StaffFeature.JsonDataTransfer)) return;
+            if (!allowDemoAccess && StaffAccess.DenyUnless(this, resolvedAccess, StaffFeature.JsonDataTransfer)) return;
+
+            if (allowDemoAccess && resolvedAccess?.CanOpen(StaffFeature.JsonDataTransfer) != true)
+            {
+                Text = "Demo JSON import";
+                titleLabel.Text = "Import demo JSON data";
+                descriptionLabel.Text = "Choose a prepared JSON file to load demo data before logging in. This is intended for testing and presentation setup.";
+                exportButton.Enabled = false;
+                exportButton.Visible = false;
+                statusLabel.Text = "Demo import mode is enabled.";
+            }
         }
 
         private void browseButton_Click(object sender, EventArgs e)
