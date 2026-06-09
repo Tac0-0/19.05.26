@@ -7,10 +7,14 @@ namespace _19._05._26
     public partial class UsersForm : Form
     {
         private readonly UsersController _controller = new();
+        private readonly StaffAccess? _access;
 
-        public UsersForm()
+        public UsersForm(StaffAccess? access = null)
         {
             InitializeComponent();
+            _access = access ?? StaffAccess.FromCurrentSession();
+            if (StaffAccess.DenyUnless(this, _access, StaffFeature.UserAdministration)) return;
+
             var (grid, toolbar) = UiGridHelper.BuildGridUi(contentPanel);
             grid.CellFormatting += UsersGrid_CellFormatting;
             async Task reload()
