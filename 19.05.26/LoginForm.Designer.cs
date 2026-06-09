@@ -55,7 +55,7 @@ namespace _19._05._26
             usernameTextBox.BorderStyle = BorderStyle.FixedSingle;
             usernameTextBox.Location = new Point(16, 24);
             usernameTextBox.Name = "usernameTextBox";
-            usernameTextBox.PlaceholderText = "Username";
+            usernameTextBox.PlaceholderText = "Username/Email";
             usernameTextBox.Size = new Size(320, 27);
             usernameTextBox.TabIndex = 0;
             // 

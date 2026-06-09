@@ -12,6 +12,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Controller\Doner.Controller.csproj" />
     <ProjectReference Include="..\Data\Doner.Data.csproj" />
+    <ProjectReference Include="..\Doner.Test\Doner.Test.csproj" />
   </ItemGroup>
 
 </Project>
