@@ -8,9 +8,12 @@ namespace _19._05._26
     {
         private readonly OrdersController _controller = new();
 
-        public KitchenOrdersForm()
+        public KitchenOrdersForm(StaffAccess? access = null)
         {
             InitializeComponent();
+            StaffAccess? resolvedAccess = access ?? StaffAccess.FromCurrentSession();
+            if (StaffAccess.DenyUnless(this, resolvedAccess, StaffFeature.KitchenOrders)) return;
+
             var (grid, toolbar) = UiGridHelper.BuildGridUi(contentPanel);
             async Task reload() => await UiGridHelper.BindAsync(grid, _controller.GetAllOrders);
             UiGridHelper.AddButton(toolbar, "Reload", reload);

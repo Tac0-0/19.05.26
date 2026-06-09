@@ -7,9 +7,12 @@ namespace _19._05._26
     {
         private readonly CategoriesController _controller = new();
 
-        public CategoriesForm()
+        public CategoriesForm(StaffAccess? access = null)
         {
             InitializeComponent();
+            StaffAccess? resolvedAccess = access ?? StaffAccess.FromCurrentSession();
+            if (StaffAccess.DenyUnless(this, resolvedAccess, StaffFeature.CategoryManagement)) return;
+
             var (grid, toolbar) = UiGridHelper.BuildGridUi(contentPanel);
             async Task reload() => await UiGridHelper.BindAsync(grid, _controller.GetAllCategories);
             UiGridHelper.AddButton(toolbar, "Reload", reload);

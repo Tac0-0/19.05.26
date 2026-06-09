@@ -8,10 +8,13 @@ namespace _19._05._26
         private readonly ProductIngredientsController _controller = new();
         private readonly int _productId;
 
-        public ProductIngredientsForm(int productId = 0)
+        public ProductIngredientsForm(int productId = 0, StaffAccess? access = null)
         {
             InitializeComponent();
             _productId = productId;
+            StaffAccess? resolvedAccess = access ?? StaffAccess.FromCurrentSession();
+            if (StaffAccess.DenyUnless(this, resolvedAccess, StaffFeature.ProductCatalog)) return;
+
             var (grid, toolbar) = UiGridHelper.BuildGridUi(contentPanel);
             async Task reload() => await UiGridHelper.BindAsync(grid, () => _controller.GetRecipeByProduct(_productId));
             UiGridHelper.AddButton(toolbar, "Reload", reload);

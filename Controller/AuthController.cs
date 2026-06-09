@@ -20,6 +20,8 @@ namespace Doner.Controller
         private static Users? LoggedUser;
         private DonerDBContext context;
 
+        public static Users? CurrentUser => LoggedUser;
+
         public async Task<Users?> Login(string username, string password)
         {
             if (username.Contains('@'))
@@ -39,6 +41,12 @@ namespace Doner.Controller
 
         public async Task<bool> Register(Users user)
         {
+            ArgumentNullException.ThrowIfNull(user);
+            if (user.Role != UserRole.Customer || user is not Customers)
+            {
+                return false;
+            }
+
             bool exists = await context.Users.AnyAsync(u => u.UserName == user.UserName || u.Email == user.Email);
             if (exists)
             {

@@ -9,10 +9,13 @@ namespace _19._05._26
         private readonly PaymentsController _controller = new();
         private readonly int _orderId;
 
-        public PaymentsForm(int orderId = 0)
+        public PaymentsForm(int orderId = 0, StaffAccess? access = null)
         {
             InitializeComponent();
             _orderId = orderId;
+            StaffAccess? resolvedAccess = access ?? StaffAccess.FromCurrentSession();
+            if (StaffAccess.DenyUnless(this, resolvedAccess, StaffFeature.OrderDesk)) return;
+
             var (grid, toolbar) = UiGridHelper.BuildGridUi(contentPanel);
             async Task reload() => await UiGridHelper.BindAsync(grid, () => _controller.GetPaymentsByOrder(_orderId));
             UiGridHelper.AddButton(toolbar, "Reload", reload);

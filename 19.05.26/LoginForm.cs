@@ -10,6 +10,8 @@ namespace _19._05._26
         public LoginForm()
         {
             InitializeComponent();
+            importJsonButton.Enabled = false;
+            importJsonButton.Visible = false;
         }
 
         private async void loginButton_Click(object sender, EventArgs e)
@@ -29,7 +31,7 @@ namespace _19._05._26
                 return;
             }
 
-            Form nextForm = user.Role == UserRole.Customer ? new CustomerMainForm() : new StaffMainForm(user.Role.ToString());
+            Form nextForm = user.Role == UserRole.Customer ? new CustomerMainForm() : new StaffMainForm(user);
             nextForm.FormClosed += (_, _) => Close();
             Hide();
             nextForm.Show();
@@ -40,9 +42,6 @@ namespace _19._05._26
             new RegisterForm().ShowDialog(this);
         }
 
-        private void importJsonButton_Click(object sender, EventArgs e)
-        {
-            new JsonImportForm().ShowDialog(this);
-        }
+        private void importJsonButton_Click(object sender, EventArgs e) { }
     }
 }

@@ -6,10 +6,14 @@ namespace _19._05._26
     public partial class OrdersForm : Form
     {
         private readonly OrdersController _controller = new();
+        private readonly StaffAccess? _access;
 
-        public OrdersForm()
+        public OrdersForm(StaffAccess? access = null)
         {
             InitializeComponent();
+            _access = access ?? StaffAccess.FromCurrentSession();
+            if (StaffAccess.DenyUnless(this, _access, StaffFeature.OrderDesk)) return;
+
             var (grid, toolbar) = UiGridHelper.BuildGridUi(contentPanel);
             async Task reload() => await UiGridHelper.BindAsync(grid, _controller.GetAllOrders);
             UiGridHelper.AddButton(toolbar, "Reload", reload);
@@ -45,7 +49,7 @@ namespace _19._05._26
             UiGridHelper.AddButton(toolbar, "Payments", () =>
             {
                 Orders? selected = UiGridHelper.GetSelected<Orders>(grid);
-                if (selected is not null) new PaymentsForm(selected.OrderId).ShowDialog(this);
+                if (selected is not null) new PaymentsForm(selected.OrderId, _access).ShowDialog(this);
                 return Task.CompletedTask;
             });
             Load += async (_, _) => await reload();

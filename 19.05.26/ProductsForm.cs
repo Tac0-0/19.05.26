@@ -6,10 +6,14 @@ namespace _19._05._26
     public partial class ProductsForm : Form
     {
         private readonly ProductsController _controller = new();
+        private readonly StaffAccess? _access;
 
-        public ProductsForm()
+        public ProductsForm(StaffAccess? access = null)
         {
             InitializeComponent();
+            _access = access ?? StaffAccess.FromCurrentSession();
+            if (StaffAccess.DenyUnless(this, _access, StaffFeature.ProductCatalog)) return;
+
             var (grid, toolbar) = UiGridHelper.BuildGridUi(contentPanel);
             async Task reload() => await UiGridHelper.BindAsync(grid, _controller.GetAllProducts);
             UiGridHelper.AddButton(toolbar, "Reload", reload);
@@ -44,7 +48,7 @@ namespace _19._05._26
             UiGridHelper.AddButton(toolbar, "Recipe", () =>
             {
                 Products? selected = UiGridHelper.GetSelected<Products>(grid);
-                if (selected is not null) new ProductIngredientsForm(selected.ProductId).ShowDialog(this);
+                if (selected is not null) new ProductIngredientsForm(selected.ProductId, _access).ShowDialog(this);
                 return Task.CompletedTask;
             });
             Load += async (_, _) => await reload();
