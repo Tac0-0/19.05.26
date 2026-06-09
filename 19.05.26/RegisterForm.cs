@@ -12,15 +12,14 @@ namespace _19._05._26
         {
             InitializeComponent();
             roleComboBox.Items.Clear();
-            roleComboBox.Items.Add("Customer");
+            roleComboBox.Items.AddRange(new object[] { "Customer", "Cashier", "Cook", "DeliveryWorker", "Manager", "Admin" });
             roleComboBox.SelectedIndex = 0;
-            roleComboBox.Enabled = false;
-            roleComboBox.Visible = false;
-            roleLabel.AutoSize = false;
-            roleLabel.Text = "Public registration creates customer accounts only.";
+            roleComboBox.Enabled = true;
+            roleComboBox.Visible = true;
+            roleLabel.AutoSize = true;
+            roleLabel.Text = "Role";
             roleLabel.Location = new Point(16, 226);
-            roleLabel.Size = new Size(356, 36);
-            createAccountButton.Location = new Point(16, 284);
+            createAccountButton.Location = new Point(16, 301);
         }
 
         private async void createAccountButton_Click(object sender, EventArgs e)
@@ -44,7 +43,7 @@ namespace _19._05._26
                 return;
             }
 
-            Users user = CreateUser();
+            Users user = CreateUser(roleComboBox.SelectedIndex);
             user.FirstName = firstName;
             user.LastName = lastName;
             user.UserName = username;
@@ -57,11 +56,27 @@ namespace _19._05._26
             if (ok) Close();
         }
 
-        private static Users CreateUser()
+        private static Users CreateUser(int selectedRole)
         {
-            return new Customers
+            return selectedRole switch
             {
-                Role = UserRole.Customer
+                0 => new Customers { Role = UserRole.Customer },
+                1 => CreateEmployee(EmployeePosition.Cashier),
+                2 => CreateEmployee(EmployeePosition.Cook),
+                3 => CreateEmployee(EmployeePosition.DeliveryWorker),
+                4 => CreateEmployee(EmployeePosition.Manager),
+                5 => new Admins { Role = UserRole.Admin },
+                _ => throw new InvalidOperationException("Select a valid role.")
+            };
+        }
+
+        private static Employees CreateEmployee(EmployeePosition position)
+        {
+            return new Employees
+            {
+                Role = UserRole.Employee,
+                EmployeePosition = position,
+                HireDate = DateTime.Now
             };
         }
     }
