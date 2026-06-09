@@ -6,9 +6,11 @@ namespace _19._05._26
     {
         private readonly JsonController _controller = new();
 
-        public JsonImportForm()
+        public JsonImportForm(StaffAccess? access = null)
         {
             InitializeComponent();
+            StaffAccess? resolvedAccess = access ?? StaffAccess.FromCurrentSession();
+            if (StaffAccess.DenyUnless(this, resolvedAccess, StaffFeature.JsonDataTransfer)) return;
         }
 
         private void browseButton_Click(object sender, EventArgs e)

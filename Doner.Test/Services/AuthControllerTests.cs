@@ -24,6 +24,8 @@ public class AuthControllerTests
         Assert.That(customer.IsActive, Is.True);
         Assert.That(await controller.Register(NewCustomer("new-user", "different@example.com")), Is.False);
         Assert.That(await controller.Register(NewCustomer("different", "new@example.com")), Is.False);
+        Assert.That(await controller.Register(NewEmployee("cashier", "cashier@example.com")), Is.False);
+        Assert.That(await controller.Register(NewAdmin("admin", "admin@example.com")), Is.False);
         Assert.That(await controller.Login("new-user", "wrong"), Is.Null);
         Assert.That(await controller.Login("new-user", "password"), Is.SameAs(customer));
         Assert.That(await controller.GetLoggedUser(), Is.SameAs(customer));
@@ -63,8 +65,7 @@ public class AuthControllerTests
         await context.DisposeAsync();
         var controller = new AuthController(context);
 
-        Assert.That((Func<Task>)(async () => await new AuthController(new ControllerTestFactory().CreateContext()).Register(null!)), Throws.TypeOf<InvalidOperationException>()
-            .With.InnerException.TypeOf<NullReferenceException>());
+        Assert.That((Func<Task>)(async () => await new AuthController(new ControllerTestFactory().CreateContext()).Register(null!)), Throws.TypeOf<ArgumentNullException>());
         Assert.That((Func<Task>)(async () => await controller.Login("user", "password")), Throws.TypeOf<ObjectDisposedException>());
         Assert.That((Func<Task>)(async () => await controller.Register(NewCustomer("user", "user@example.com"))), Throws.TypeOf<ObjectDisposedException>());
     }
@@ -73,5 +74,18 @@ public class AuthControllerTests
     {
         UserName = username, Password = "password", Email = email, FirstName = "Test", LastName = "User",
         PhoneNumber = "1", Role = UserRole.Customer, IsActive = active
+    };
+
+    private static Employees NewEmployee(string username, string email) => new()
+    {
+        UserName = username, Password = "password", Email = email, FirstName = "Test", LastName = "Employee",
+        PhoneNumber = "1", Role = UserRole.Employee, EmployeePosition = EmployeePosition.Cashier, IsActive = true,
+        HireDate = DateTime.Now
+    };
+
+    private static Admins NewAdmin(string username, string email) => new()
+    {
+        UserName = username, Password = "password", Email = email, FirstName = "Test", LastName = "Admin",
+        PhoneNumber = "1", Role = UserRole.Admin, IsActive = true
     };
 }

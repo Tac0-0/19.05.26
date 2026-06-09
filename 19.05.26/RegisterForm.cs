@@ -11,7 +11,16 @@ namespace _19._05._26
         public RegisterForm()
         {
             InitializeComponent();
+            roleComboBox.Items.Clear();
+            roleComboBox.Items.Add("Customer");
             roleComboBox.SelectedIndex = 0;
+            roleComboBox.Enabled = false;
+            roleComboBox.Visible = false;
+            roleLabel.AutoSize = false;
+            roleLabel.Text = "Public registration creates customer accounts only.";
+            roleLabel.Location = new Point(16, 226);
+            roleLabel.Size = new Size(356, 36);
+            createAccountButton.Location = new Point(16, 284);
         }
 
         private async void createAccountButton_Click(object sender, EventArgs e)
@@ -35,7 +44,7 @@ namespace _19._05._26
                 return;
             }
 
-            Users user = CreateUser(roleComboBox.SelectedIndex);
+            Users user = CreateUser();
             user.FirstName = firstName;
             user.LastName = lastName;
             user.UserName = username;
@@ -48,27 +57,11 @@ namespace _19._05._26
             if (ok) Close();
         }
 
-        private static Users CreateUser(int selectedRole)
+        private static Users CreateUser()
         {
-            return selectedRole switch
+            return new Customers
             {
-                0 => new Customers { Role = UserRole.Customer },
-                1 => CreateEmployee(EmployeePosition.Cashier),
-                2 => CreateEmployee(EmployeePosition.Cook),
-                3 => CreateEmployee(EmployeePosition.DeliveryWorker),
-                4 => CreateEmployee(EmployeePosition.Manager),
-                5 => new Admins { Role = UserRole.Admin },
-                _ => throw new InvalidOperationException("Select a valid role.")
-            };
-        }
-
-        private static Employees CreateEmployee(EmployeePosition position)
-        {
-            return new Employees
-            {
-                Role = UserRole.Employee,
-                EmployeePosition = position,
-                HireDate = DateTime.Now
+                Role = UserRole.Customer
             };
         }
     }

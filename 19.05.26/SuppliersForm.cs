@@ -7,9 +7,12 @@ namespace _19._05._26
     {
         private readonly SuppliersController _controller = new();
 
-        public SuppliersForm()
+        public SuppliersForm(StaffAccess? access = null)
         {
             InitializeComponent();
+            StaffAccess? resolvedAccess = access ?? StaffAccess.FromCurrentSession();
+            if (StaffAccess.DenyUnless(this, resolvedAccess, StaffFeature.SupplierManagement)) return;
+
             var (grid, toolbar) = UiGridHelper.BuildGridUi(contentPanel);
             async Task reload() => await UiGridHelper.BindAsync(grid, _controller.GetAllSuppliers);
             UiGridHelper.AddButton(toolbar, "Reload", reload);

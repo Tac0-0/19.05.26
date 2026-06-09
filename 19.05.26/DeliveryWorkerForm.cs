@@ -9,9 +9,12 @@ namespace _19._05._26
         private readonly AuthController _authController = new();
         private readonly DeliveriesController _deliveriesController = new();
 
-        public DeliveryWorkerForm()
+        public DeliveryWorkerForm(StaffAccess? access = null)
         {
             InitializeComponent();
+            StaffAccess? resolvedAccess = access ?? StaffAccess.FromCurrentSession();
+            if (StaffAccess.DenyUnless(this, resolvedAccess, StaffFeature.AssignedDeliveries)) return;
+
             var (grid, toolbar) = UiGridHelper.BuildGridUi(contentPanel);
             async Task reload()
             {

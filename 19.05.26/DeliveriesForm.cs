@@ -8,9 +8,12 @@ namespace _19._05._26
     {
         private readonly DeliveriesController _controller = new();
 
-        public DeliveriesForm()
+        public DeliveriesForm(StaffAccess? access = null)
         {
             InitializeComponent();
+            StaffAccess? resolvedAccess = access ?? StaffAccess.FromCurrentSession();
+            if (StaffAccess.DenyUnless(this, resolvedAccess, StaffFeature.DeliveryManagement)) return;
+
             var (grid, toolbar) = UiGridHelper.BuildGridUi(contentPanel);
             async Task reload() => await UiGridHelper.BindAsync(grid, _controller.GetAllDeliveries);
             UiGridHelper.AddButton(toolbar, "Reload", reload);
