@@ -28,19 +28,41 @@ public class DeliveriesController : DbController
         return await context.Deliveries.Where(d => d.DeliveryStatus == status).ToListAsync();
     }
 
+    public async Task<List<Employees>> GetActiveDeliveryWorkers()
+    {
+        await using DonerDBContext context = CreateContext();
+        return await context.Users
+            .OfType<Employees>()
+            .Where(u => u.IsActive && u.EmployeePosition == EmployeePosition.DeliveryWorker)
+            .OrderBy(u => u.FirstName)
+            .ThenBy(u => u.LastName)
+            .ThenBy(u => u.UserName)
+            .ToListAsync();
+    }
+
     public async Task AssignDeliveryWorker(int deliveryId, int userId)
     {
         await using DonerDBContext context = CreateContext();
         Deliveries? delivery = await context.Deliveries.FindAsync(deliveryId);
+       
         if (delivery is null)
         {
             return;
+        }
+
+        bool isDeliveryWorker = await context.Users
+            .OfType<Employees>()
+            .AnyAsync(u => u.UserId == userId && u.IsActive && u.EmployeePosition == EmployeePosition.DeliveryWorker);
+        if (!isDeliveryWorker)
+        {
+            throw new InvalidOperationException("Select an active delivery worker.");
         }
 
         delivery.DeliveryWorkerId = userId;
         delivery.DeliveryStatus = DeliveryStatus.Assigned;
         await context.SaveChangesAsync();
     }
+}
 
     public async Task UpdateDeliveryStatus(int deliveryId, DeliveryStatus status)
     {

@@ -23,6 +23,16 @@ public class OrdersControllerTests
         Assert.That(controller.CalculateTotal(details), Is.EqualTo(6));
         Orders created = await controller.CreateOrder(order, details);
         Assert.That(created.TotalPrice, Is.EqualTo(6));
+        Orders deliveryOrder = await controller.CreateOrder(
+            new Orders { UserId = seed.CustomerId, AddressId = seed.AddressId, OrderDate = DateTime.Now.AddMinutes(45), OrderType = OrderType.Delivery, OrderStatus = OrderStatus.Pending },
+            []);
+        await using (var context = factory.CreateContext())
+        {
+            Deliveries delivery = context.Deliveries.Single(d => d.OrderId == deliveryOrder.OrderId);
+            Assert.That(delivery.AddressId, Is.EqualTo(seed.AddressId));
+            Assert.That(delivery.DeliveryStatus, Is.EqualTo(DeliveryStatus.WaitingForCourier));
+            Assert.That(delivery.EstimatedDeliveryTime, Is.EqualTo(deliveryOrder.OrderDate));
+        }
         Assert.That((Func<Task>)(async () => await controller.CreateOrder(
             new Orders { UserId = seed.CustomerId, AddressId = seed.AddressId, OrderDate = DateTime.Now.AddMinutes(29), OrderType = OrderType.Takeaway, OrderStatus = OrderStatus.Pending },
             [])), Throws.TypeOf<InvalidOperationException>().With.Message.EqualTo("Order date and time must be at least 30 minutes from now."));

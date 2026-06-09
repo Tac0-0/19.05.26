@@ -15,7 +15,30 @@ public class DeliveriesControllerTests
         var controller = new DeliveriesController(factory.CreateContext);
 
         Assert.That(await controller.GetAllDeliveries(), Has.Count.EqualTo(1));
+        Assert.That(await controller.GetActiveDeliveryWorkers(), Has.Count.EqualTo(1));
         Assert.That(await controller.GetDeliveriesByStatus(DeliveryStatus.WaitingForCourier), Has.Count.EqualTo(1));
+        int cashierId;
+        await using (var context = factory.CreateContext())
+        {
+            var cashier = new Employees
+            {
+                UserName = "cashier",
+                Password = "password",
+                Email = "cashier@example.com",
+                FirstName = "Cash",
+                LastName = "Register",
+                PhoneNumber = "555",
+                Role = UserRole.Employee,
+                IsActive = true,
+                EmployeePosition = EmployeePosition.Cashier,
+                HireDate = new DateTime(2026, 1, 1)
+            };
+            context.Users.Add(cashier);
+            await context.SaveChangesAsync();
+            cashierId = cashier.UserId;
+        }
+        Assert.That((Func<Task>)(async () => await controller.AssignDeliveryWorker(seed.DeliveryId, cashierId)),
+            Throws.TypeOf<InvalidOperationException>().With.Message.EqualTo("Select an active delivery worker."));
         await controller.AssignDeliveryWorker(seed.DeliveryId, seed.EmployeeId);
         await controller.AssignDeliveryWorker(-1, seed.EmployeeId);
         Assert.That(await controller.GetDeliveriesByWorker(seed.EmployeeId), Has.Count.EqualTo(1));
@@ -34,6 +57,7 @@ public class DeliveriesControllerTests
             async () => await controller.GetAllDeliveries(),
             async () => await controller.GetDeliveriesByWorker(1),
             async () => await controller.GetDeliveriesByStatus(DeliveryStatus.Assigned),
+            async () => await controller.GetActiveDeliveryWorkers(),
             async () => await controller.AssignDeliveryWorker(1, 1),
             async () => await controller.UpdateDeliveryStatus(1, DeliveryStatus.Delivered),
             async () => await controller.CompleteDelivery(1),

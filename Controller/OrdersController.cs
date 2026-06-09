@@ -48,6 +48,17 @@ public class OrdersController : DbController
         await context.Orders.AddAsync(order);
         await context.SaveChangesAsync();
 
+        if (order.OrderType == OrderType.Delivery)
+        {
+            await context.Deliveries.AddAsync(new Deliveries
+            {
+                OrderId = order.OrderId,
+                AddressId = order.AddressId,
+                DeliveryStatus = DeliveryStatus.WaitingForCourier,
+                EstimatedDeliveryTime = order.OrderDate
+            });
+        }
+
         foreach (OrderDetails detail in orderDetails)
         {
             detail.OrderId = order.OrderId;
