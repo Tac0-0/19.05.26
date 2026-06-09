@@ -36,6 +36,12 @@ public class OrdersController : DbController
 
     public async Task<Orders> CreateOrder(Orders order, List<OrderDetails> orderDetails)
     {
+        ArgumentNullException.ThrowIfNull(orderDetails);
+        if (order.OrderDate < GetMinimumOrderDateTime())
+        {
+            throw new InvalidOperationException("Order date and time must be at least 30 minutes from now.");
+        }
+
         await using DonerDBContext context = CreateContext();
         order.TotalPrice = CalculateTotal(orderDetails);
 
@@ -74,5 +80,12 @@ public class OrdersController : DbController
     public decimal CalculateTotal(List<OrderDetails> orderDetails)
     {
         return orderDetails.Sum(d => d.UnitPrice * d.Quantity);
+    }
+
+    public static DateTime GetMinimumOrderDateTime()
+    {
+        DateTime now = DateTime.Now;
+        DateTime currentMinute = new(now.Year, now.Month, now.Day, now.Hour, now.Minute, 0);
+        return (now == currentMinute ? currentMinute : currentMinute.AddMinutes(1)).AddMinutes(30);
     }
 }

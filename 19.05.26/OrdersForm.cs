@@ -19,8 +19,12 @@ namespace _19._05._26
             UiGridHelper.AddButton(toolbar, "Reload", reload);
             UiGridHelper.AddButton(toolbar, "Add", async () =>
             {
-                Orders order = new() { OrderDate = DateTime.Now };
+                Orders order = new() { OrderDate = OrdersController.GetMinimumOrderDateTime().AddMinutes(15) };
                 if (!UiGridHelper.EditEntity(order, "Add order", "OrderId", "TotalPrice")) return;
+                if (order.OrderDate < OrdersController.GetMinimumOrderDateTime())
+                {
+                    throw new InvalidOperationException("Order date and time must be at least 30 minutes from now.");
+                }
                 await _controller.CreateOrder(order, new List<OrderDetails>());
                 await reload();
             });

@@ -39,6 +39,11 @@ public static class UiGridHelper
                 args.Value = FormatEnum(value);
                 args.FormattingApplied = true;
             }
+            else if (args.Value is DateTime dateTime)
+            {
+                args.Value = dateTime.ToString("yyyy-MM-dd HH:mm");
+                args.FormattingApplied = true;
+            }
         };
         grid.DataError += (_, args) =>
         {
@@ -232,7 +237,13 @@ public static class UiGridHelper
         if (actual == typeof(bool)) return new CheckBox { Dock = DockStyle.Fill, Checked = value as bool? ?? false };
         if (actual == typeof(DateTime))
         {
-            DateTimePicker picker = new() { Dock = DockStyle.Fill, ShowCheckBox = Nullable.GetUnderlyingType(property.PropertyType) is not null };
+            DateTimePicker picker = new()
+            {
+                Dock = DockStyle.Fill,
+                Format = DateTimePickerFormat.Custom,
+                CustomFormat = "yyyy-MM-dd HH:mm",
+                ShowCheckBox = Nullable.GetUnderlyingType(property.PropertyType) is not null
+            };
             picker.Value = value as DateTime? ?? DateTime.Now;
             picker.Checked = value is not null;
             return picker;
